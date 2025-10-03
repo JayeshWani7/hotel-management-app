@@ -1,0 +1,298 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthResponse {
+  accessToken: String!
+  user: User!
+}
+
+type Booking {
+  cancellationDate: DateTime
+  cancellationReason: String
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
+  createdAt: DateTime!
+  id: ID!
+  notes: String
+  numberOfGuests: Float!
+  payment: Payment
+  room: Room!
+  specialRequests: String
+  status: BookingStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  user: User!
+}
+
+"""The status of the booking"""
+enum BookingStatus {
+  CANCELLED
+  COMPLETED
+  CONFIRMED
+  NO_SHOW
+  PENDING
+}
+
+input CancelBookingInput {
+  cancellationReason: String!
+}
+
+input CreateBookingInput {
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
+  numberOfGuests: Int!
+  roomId: String!
+  specialRequests: String
+}
+
+input CreateHotelInput {
+  address: String!
+  amenities: [String!]
+  checkInTime: String
+  checkOutTime: String
+  city: String!
+  country: String!
+  description: String!
+  email: String
+  images: [String!]
+  latitude: Float
+  longitude: Float
+  name: String!
+  phone: String
+  policies: String
+  postalCode: String!
+  state: String!
+}
+
+input CreateRoomInput {
+  amenities: [String!]
+  capacity: Int!
+  description: String
+  hotelId: String!
+  images: [String!]
+  pricePerNight: Float!
+  roomNumber: String!
+  size: Int!
+  type: RoomType!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Hotel {
+  address: String!
+  amenities: [String!]
+  checkInTime: String
+  checkOutTime: String
+  city: String!
+  country: String!
+  createdAt: DateTime!
+  description: String!
+  email: String
+  id: ID!
+  images: [String!]
+  isActive: Boolean!
+  latitude: Float
+  longitude: Float
+  name: String!
+  phone: String
+  policies: String
+  postalCode: String!
+  rating: Float!
+  rooms: [Room!]
+  state: String!
+  updatedAt: DateTime!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  addRoom(createRoomInput: CreateRoomInput!): Room!
+  cancelBooking(cancelBookingInput: CancelBookingInput!, id: String!): Booking!
+  createBooking(createBookingInput: CreateBookingInput!): Booking!
+  createHotel(createHotelInput: CreateHotelInput!): Hotel!
+  deleteBooking(id: String!): Boolean!
+  deleteHotel(id: String!): Boolean!
+  deleteRoom(id: String!): Boolean!
+  deleteUser(id: String!): Boolean!
+  initiatePayment(bookingId: String!): String!
+  login(loginUserInput: LoginUserInput!): AuthResponse!
+  register(registerUserInput: RegisterUserInput!): AuthResponse!
+  updateBooking(id: String!, updateBookingInput: UpdateBookingInput!): Booking!
+  updateHotel(id: String!, updateHotelInput: UpdateHotelInput!): Hotel!
+  updateProfile(updateUserInput: UpdateUserInput!): User!
+  updateRoom(id: String!, updateRoomInput: UpdateRoomInput!): Room!
+  verifyPayment(orderId: String!): Boolean!
+}
+
+type Payment {
+  amount: Float!
+  booking: Booking!
+  cashfreeOrderId: String
+  cashfreePaymentId: String
+  createdAt: DateTime!
+  failureReason: String
+  id: ID!
+  method: PaymentMethod
+  paymentDate: DateTime
+  refundAmount: Float
+  refundId: String
+  status: PaymentStatus!
+  transactionId: String
+  updatedAt: DateTime!
+}
+
+"""The method used for payment"""
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  NET_BANKING
+  UPI
+  WALLET
+}
+
+"""The status of the payment"""
+enum PaymentStatus {
+  FAILED
+  PARTIALLY_REFUNDED
+  PENDING
+  REFUNDED
+  SUCCESS
+}
+
+type Query {
+  getAllBookings: [Booking!]!
+  getAvailableRooms(checkInDate: DateTime!, checkOutDate: DateTime!, hotelId: String!): [Room!]!
+  getBooking(id: String!): Booking!
+  getBookings(userId: String): [Booking!]!
+  getHotel(id: String!): Hotel!
+  getHotels: [Hotel!]!
+  getHotelsByCity(city: String!): [Hotel!]!
+  getPaymentByBooking(bookingId: String!): Payment!
+  getPayments: [Payment!]!
+  getRoom(id: String!): Room!
+  getRooms(hotelId: String): [Room!]!
+  me: User!
+  searchHotels(query: String!): [Hotel!]!
+  user(id: String!): User!
+  users: [User!]!
+}
+
+input RegisterUserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  password: String!
+  phone: String
+}
+
+type Room {
+  amenities: [String!]
+  bookings: [Booking!]
+  capacity: Int!
+  createdAt: DateTime!
+  description: String
+  hotel: Hotel!
+  id: ID!
+  images: [String!]
+  isActive: Boolean!
+  pricePerNight: Float!
+  roomNumber: String!
+  size: Int!
+  status: RoomStatus!
+  type: RoomType!
+  updatedAt: DateTime!
+}
+
+"""The current status of the room"""
+enum RoomStatus {
+  AVAILABLE
+  MAINTENANCE
+  OCCUPIED
+  OUT_OF_ORDER
+}
+
+"""The type of room available"""
+enum RoomType {
+  DELUXE
+  DOUBLE
+  FAMILY
+  SINGLE
+  SUITE
+}
+
+input UpdateBookingInput {
+  checkInDate: DateTime
+  checkOutDate: DateTime
+  notes: String
+  numberOfGuests: Int
+  specialRequests: String
+}
+
+input UpdateHotelInput {
+  address: String
+  amenities: [String!]
+  checkInTime: String
+  checkOutTime: String
+  city: String
+  country: String
+  description: String
+  email: String
+  images: [String!]
+  isActive: Boolean
+  latitude: Float
+  longitude: Float
+  name: String
+  phone: String
+  policies: String
+  postalCode: String
+  rating: Float
+  state: String
+}
+
+input UpdateRoomInput {
+  amenities: [String!]
+  capacity: Int
+  description: String
+  images: [String!]
+  isActive: Boolean
+  pricePerNight: Float
+  roomNumber: String
+  size: Int
+  status: RoomStatus
+  type: RoomType
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  phone: String
+  profileImage: String
+}
+
+type User {
+  bookings: [Booking!]
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  id: ID!
+  isActive: Boolean!
+  lastName: String!
+  phone: String
+  profileImage: String
+  role: UserRole!
+  updatedAt: DateTime!
+}
+
+"""The role of the user in the system"""
+enum UserRole {
+  ADMIN
+  HOTEL_MANAGER
+  USER
+}
