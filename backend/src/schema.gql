@@ -190,6 +190,7 @@ input RegisterUserInput {
   lastName: String!
   password: String!
   phone: String
+  role: UserRole = USER
 }
 
 type Room {
