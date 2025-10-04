@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-
 // Import entities
 import { User } from '../modules/users/entities/user.entity';
 import { Hotel } from '../modules/hotels/entities/hotel.entity';
@@ -19,10 +18,9 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
     return {
       type: 'postgres',
       host: this.configService.get<string>('DB_HOST', 'localhost'),
-      // port: this.configService.get<number>('DB_PORT', 5432),
-      port: parseInt(this.configService.get<string>('DB_PORT', '5432'), 10),
+      port: this.configService.get<number>('DB_PORT', 5432),
       username: this.configService.get<string>('DB_USERNAME', 'postgres'),
-      password: this.configService.get<string>('DB_PASSWORD', 'zxcvbnm'),
+      password: this.configService.get<string>('DB_PASSWORD', 'password'),
       database: this.configService.get<string>('DB_DATABASE', 'hotel_management'),
       entities: [User, Hotel, Room, Booking, Payment],
       migrations: ['dist/migrations/*.js'],
@@ -38,7 +36,7 @@ export const dataSourceOptions: DataSourceOptions = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT) || 5432,
   username: process.env.DB_USERNAME || 'postgres',
-  password: process.env.DB_PASSWORD || 'zxcvbnm',
+  password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_DATABASE || 'hotel_management',
   entities: [User, Hotel, Room, Booking, Payment],
   migrations: ['src/migrations/*.ts'],

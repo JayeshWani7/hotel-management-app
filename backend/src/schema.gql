@@ -39,8 +39,8 @@ input CancelBookingInput {
 }
 
 input CreateBookingInput {
-  checkInDate: String!
-  checkOutDate: String!
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
   numberOfGuests: Int!
   roomId: String!
   specialRequests: String
@@ -229,8 +229,8 @@ enum RoomType {
 }
 
 input UpdateBookingInput {
-  checkInDate: String
-  checkOutDate: String
+  checkInDate: DateTime
+  checkOutDate: DateTime
   notes: String
   numberOfGuests: Int
   specialRequests: String
