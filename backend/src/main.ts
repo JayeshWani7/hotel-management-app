@@ -8,6 +8,7 @@ async function bootstrap() {
   
   // Enable CORS for frontend communication
   app.enableCors({
+    // origin: ['http://localhost:3001'],
     origin: ['http://localhost:3001', 'http://localhost:3000'],
     credentials: true,
   });
@@ -21,6 +22,7 @@ async function bootstrap() {
   
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3000;
+  // const port =  3000;
   
   await app.listen(port);
   console.log(`Hotel Management API running on http://localhost:${port}`);
