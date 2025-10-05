@@ -46,7 +46,8 @@ const Register: React.FC = () => {
         setError('Passwords do not match');
         return;
       }
-      await registerUser(data);
+      const { confirmPassword, ...safeData } = data;
+      await registerUser(safeData);
     } catch (err) {
       setError('Registration failed. Please try again.');
     }
