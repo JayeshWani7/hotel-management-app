@@ -15,6 +15,10 @@ export class PaymentsResolver {
   async initiatePayment(@Args('bookingId') bookingId: string): Promise<InitiatePaymentResponseDto> {
     return this.paymentsService.initiatePayment(bookingId);
   }
+  // @UseGuards(JwtAuthGuard)
+  // async initiatePayment(@Args('bookingId') bookingId: string): Promise<any> {
+  //   return this.paymentsService.initiatePayment(bookingId);
+  // }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
