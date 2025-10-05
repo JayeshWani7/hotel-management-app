@@ -21,17 +21,21 @@ import type { Hotel } from '../../types';
 interface HotelCardProps {
   hotel: Hotel;
   showActions?: boolean;
+  showBooking?: boolean;
   onView?: (hotel: Hotel) => void;
   onEdit?: (hotel: Hotel) => void;
   onDelete?: (hotel: Hotel) => void;
+  onBook?: (hotel: Hotel) => void;
 }
 
 const HotelCard: React.FC<HotelCardProps> = ({
   hotel,
   showActions = false,
+  showBooking = false,
   onView,
   onEdit,
   onDelete,
+  onBook,
 }) => {
   const handleView = () => {
     onView?.(hotel);
@@ -43,6 +47,10 @@ const HotelCard: React.FC<HotelCardProps> = ({
 
   const handleDelete = () => {
     onDelete?.(hotel);
+  };
+
+  const handleBook = () => {
+    onBook?.(hotel);
   };
 
   return (
@@ -108,14 +116,25 @@ const HotelCard: React.FC<HotelCardProps> = ({
           )}
         </Box>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
           <Button 
-            variant="contained" 
+            variant="outlined" 
             size="small"
             onClick={handleView}
           >
             View Details
           </Button>
+          
+          {showBooking && (
+            <Button 
+              variant="contained" 
+              size="small"
+              onClick={handleBook}
+              color="primary"
+            >
+              Book Now
+            </Button>
+          )}
           
           {showActions && (
             <Box>
