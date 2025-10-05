@@ -39,8 +39,8 @@ input CancelBookingInput {
 }
 
 input CreateBookingInput {
-  checkInDate: DateTime!
-  checkOutDate: DateTime!
+  checkInDate: String!
+  checkOutDate: String!
   numberOfGuests: Int!
   roomId: String!
   specialRequests: String
@@ -107,6 +107,12 @@ type Hotel {
   updatedAt: DateTime!
 }
 
+type InitiatePaymentResponseDto {
+  orderId: String!
+  orderToken: String
+  paymentSessionId: String!
+}
+
 input LoginUserInput {
   email: String!
   password: String!
@@ -121,7 +127,7 @@ type Mutation {
   deleteHotel(id: String!): Boolean!
   deleteRoom(id: String!): Boolean!
   deleteUser(id: String!): Boolean!
-  initiatePayment(bookingId: String!): String!
+  initiatePayment(bookingId: String!): InitiatePaymentResponseDto!
   login(loginUserInput: LoginUserInput!): AuthResponse!
   register(registerUserInput: RegisterUserInput!): AuthResponse!
   updateBooking(id: String!, updateBookingInput: UpdateBookingInput!): Booking!
@@ -229,8 +235,8 @@ enum RoomType {
 }
 
 input UpdateBookingInput {
-  checkInDate: DateTime
-  checkOutDate: DateTime
+  checkInDate: String
+  checkOutDate: String
   notes: String
   numberOfGuests: Int
   specialRequests: String

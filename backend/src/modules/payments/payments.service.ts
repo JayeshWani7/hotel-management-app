@@ -71,7 +71,8 @@ export class PaymentsService {
         'x-api-version': '2023-08-01',
       };
 
-      const response = await axios.default.post(
+      // const response = await axios.post(
+        const response = await axios.default.post(
         `${this.cashfreeBaseUrl}/orders`,
         orderData,
         { headers }
@@ -95,7 +96,7 @@ export class PaymentsService {
       return {
         orderId: response.data.order_id,
         paymentSessionId: response.data.payment_session_id,
-        orderToken: response.data.order_token,
+        orderToken: response.data.order_token || null,
       };
     } catch (error) {
       throw new BadRequestException(`Failed to initiate payment: ${error.message}`);
@@ -111,7 +112,8 @@ export class PaymentsService {
         'x-api-version': '2023-08-01',
       };
 
-      const response = await axios.default.get(
+      // const response = await axios.get(
+        const response = await axios.default.get(
         `${this.cashfreeBaseUrl}/orders/${orderId}`,
         { headers }
       );
