@@ -8,6 +8,10 @@ import CustomerDashboard from './pages/customer/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 import Hotels from './pages/customer/Hotels';
 import ProfilePage from './pages/ProfilePage';
+import HotelBooking from './components/bookings/HotelBooking';
+import BookingConfirmation from './pages/BookingConfirmation';
+import Payment from './pages/Payment';
+import BookingSuccess from './pages/BookingSuccess';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import { UserRole } from './types';
@@ -105,6 +109,26 @@ const AppRoutes: React.FC = () => {
       <Route path="/profile" element={
         <ProtectedRoute>
           <ProfilePage />
+        </ProtectedRoute>
+      } />
+      <Route path="/book-hotel/:hotelId" element={
+        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+          <HotelBooking />
+        </ProtectedRoute>
+      } />
+      <Route path="/booking-confirmation" element={
+        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+          <BookingConfirmation />
+        </ProtectedRoute>
+      } />
+      <Route path="/payment" element={
+        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+          <Payment />
+        </ProtectedRoute>
+      } />
+      <Route path="/booking-success" element={
+        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+          <BookingSuccess />
         </ProtectedRoute>
       } />
       

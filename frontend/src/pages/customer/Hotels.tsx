@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import HotelList from '../../components/hotels/HotelList';
 import HotelForm from '../../components/hotels/HotelForm';
 import type { HotelFormData } from '../../components/hotels/HotelForm';
@@ -9,6 +10,7 @@ import { UserRole } from '../../types';
 
 const HotelsPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [selectedHotel, setSelectedHotel] = React.useState<Hotel | null>(null);
   const [editingHotel, setEditingHotel] = React.useState<Hotel | null>(null);
   const [showForm, setShowForm] = React.useState(false);
@@ -17,6 +19,7 @@ const HotelsPage: React.FC = () => {
   const isAdmin = user?.role === UserRole.ADMIN;
   const isHotelManager = user?.role === UserRole.HOTEL_MANAGER;
   const showActions = isAdmin || isHotelManager;
+  const showBooking = user?.role === UserRole.USER;
 
   // Mock hotels data
   const mockHotels: Hotel[] = [
@@ -96,6 +99,10 @@ const HotelsPage: React.FC = () => {
     setShowDetails(true);
   };
 
+  const handleBookHotel = (hotel: Hotel) => {
+    navigate(`/book-hotel/${hotel.id}`);
+  };
+
   const handleEditHotel = (hotel: Hotel) => {
     setEditingHotel(hotel);
     setShowForm(true);
@@ -134,10 +141,12 @@ const HotelsPage: React.FC = () => {
       <HotelList
         hotels={mockHotels}
         showActions={showActions}
+        showBooking={showBooking}
         onView={handleViewHotel}
         onEdit={handleEditHotel}
         onDelete={handleDeleteHotel}
         onAdd={handleAddHotel}
+        onBook={handleBookHotel}
       />
 
       <HotelForm

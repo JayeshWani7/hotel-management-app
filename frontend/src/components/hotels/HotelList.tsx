@@ -23,20 +23,24 @@ interface HotelListProps {
   hotels: Hotel[];
   loading?: boolean;
   showActions?: boolean;
+  showBooking?: boolean;
   onView?: (hotel: Hotel) => void;
   onEdit?: (hotel: Hotel) => void;
   onDelete?: (hotel: Hotel) => void;
   onAdd?: () => void;
+  onBook?: (hotel: Hotel) => void;
 }
 
 const HotelList: React.FC<HotelListProps> = ({
   hotels,
   loading = false,
   showActions = false,
+  showBooking = false,
   onView,
   onEdit,
   onDelete,
   onAdd,
+  onBook,
 }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCity, setSelectedCity] = React.useState('');
@@ -218,9 +222,11 @@ const HotelList: React.FC<HotelListProps> = ({
               key={hotel.id}
               hotel={hotel}
               showActions={showActions}
+              showBooking={showBooking}
               onView={onView}
               onEdit={onEdit}
               onDelete={onDelete}
+              onBook={onBook}
             />
           ))}
         </Box>
