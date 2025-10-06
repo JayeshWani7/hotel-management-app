@@ -38,7 +38,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: UserR
     return <Navigate to="/login" replace />;
   }
   
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.role.toLowerCase() as UserRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
   
@@ -51,7 +51,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   
   if (isAuthenticated && user) {
     // Redirect based on user role
-    switch (user.role) {
+    switch (user.role.toLowerCase()) {
       case UserRole.ADMIN:
         return <Navigate to="/admin/dashboard" replace />;
       case UserRole.HOTEL_MANAGER:
