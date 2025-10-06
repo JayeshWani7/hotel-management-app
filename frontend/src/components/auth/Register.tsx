@@ -152,6 +152,7 @@ const Register: React.FC = () => {
                   <Select {...field} label="Role">
                     <MenuItem value={UserRole.USER}>Customer</MenuItem>
                     <MenuItem value={UserRole.HOTEL_MANAGER}>Hotel Manager</MenuItem>
+                    <MenuItem value={UserRole.ADMIN}>Admin</MenuItem>
 
                   </Select>
                 )}
