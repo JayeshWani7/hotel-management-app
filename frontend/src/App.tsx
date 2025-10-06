@@ -8,6 +8,8 @@ import CustomerDashboard from './pages/customer/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 import BookingManagement from './pages/admin/BookingManagement';
 import AdminHotelManagement from './pages/admin/HotelManagement';
+import AdminUsers from './pages/admin/Users';
+import RoomManagement from './pages/admin/RoomManagement';
 import Hotels from './pages/customer/Hotels';
 import ProfilePage from './pages/ProfilePage';
 import HotelBooking from './components/bookings/HotelBooking';
@@ -155,10 +157,7 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="/admin/rooms" element={
         <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.HOTEL_MANAGER]}>
-          <div style={{ padding: '2rem' }}>
-            <h2>Manage Rooms</h2>
-            <p>Room management page coming soon...</p>
-          </div>
+          <RoomManagement />
         </ProtectedRoute>
       } />
       <Route path="/admin/bookings" element={
@@ -168,10 +167,7 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="/admin/users" element={
         <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-          <div style={{ padding: '2rem' }}>
-            <h2>User Management</h2>
-            <p>User management page coming soon...</p>
-          </div>
+          <AdminUsers />
         </ProtectedRoute>
       } />
       <Route path="/admin/reports" element={

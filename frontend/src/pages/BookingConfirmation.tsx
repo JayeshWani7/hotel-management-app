@@ -1,4 +1,5 @@
 import React from 'react';
+import { useMutation } from '@apollo/client/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
@@ -19,6 +20,7 @@ import {
   MeetingRoom,
   Payment as PaymentIcon,
 } from '@mui/icons-material';
+import { CREATE_BOOKING } from '../graphql/bookingQueries';
 
 interface BookingData {
   hotel: any;
@@ -56,15 +58,37 @@ const BookingConfirmation: React.FC = () => {
   const taxes = Math.round(totalAmount * 0.18); // 18% GST
   const finalAmount = totalAmount + taxes;
 
-  const handleConfirmBooking = () => {
-    // Navigate to payment page with booking data
-    navigate('/payment', {
-      state: {
-        ...bookingData,
-        taxes,
-        finalAmount,
-      },
-    });
+  const [createBooking, { loading: creating }] = useMutation(CREATE_BOOKING);
+
+
+  const handleConfirmBooking = async () => {
+    try {
+      const res = await createBooking({
+        variables: {
+          createBookingInput: {
+            roomId: String(room.id),
+            checkInDate: new Date(checkInDate).toISOString(),
+            checkOutDate: new Date(checkOutDate).toISOString(),
+            numberOfGuests: guests,
+            specialRequests: specialRequests || undefined,
+          },
+        },
+      });
+
+      const created = (res.data as any)?.createBooking;
+      navigate('/payment', {
+        state: {
+          ...bookingData,
+          taxes,
+          finalAmount,
+          bookingId: created?.id,
+        },
+      });
+    } catch (e: any) {
+      const msg = e?.message || (e?.graphQLErrors?.[0]?.message) || 'Failed to create booking.';
+      console.error(e);
+      alert(msg);
+    }
   };
 
   const handleEditBooking = () => {
@@ -280,9 +304,10 @@ const BookingConfirmation: React.FC = () => {
             size="large"
             startIcon={<PaymentIcon />}
             onClick={handleConfirmBooking}
+            disabled={creating}
             sx={{ minWidth: 200 }}
           >
-            Proceed to Payment
+            {creating ? 'Creating…' : 'Proceed to Payment'}
           </Button>
         </Box>
 

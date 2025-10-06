@@ -52,7 +52,9 @@ export class BookingsService {
       checkOutDate: checkOut,
     });
 
-    return this.bookingsRepository.save(booking);
+    const saved = await this.bookingsRepository.save(booking);
+    // Return with relations to satisfy non-nullable GraphQL fields
+    return this.findOne(saved.id);
   }
 
   async findAll(): Promise<Booking[]> {

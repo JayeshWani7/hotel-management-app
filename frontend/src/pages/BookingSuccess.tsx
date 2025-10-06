@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import {
   Container,
   Paper,
@@ -21,7 +22,9 @@ import {
 const BookingSuccess: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const bookingData = location.state;
+  const bookingData = location.state as any;
+  const searchParams = new URLSearchParams(location.search);
+  const orderId = useMemo(() => bookingData?.transactionId || bookingData?.orderId || searchParams.get('order_id') || searchParams.get('orderId') || '', [bookingData, searchParams]);
 
   if (!bookingData) {
     navigate('/hotels');
@@ -39,6 +42,12 @@ const BookingSuccess: React.FC = () => {
     transactionId,
     bookingId,
   } = bookingData;
+
+  // Optionally verify again on landing if query param provided
+  // (we avoid blocking UI; backend verification already done during Payment step)
+  if (orderId && !transactionId) {
+    axios.get(`/api/payments/verify`, { params: { order_id: orderId } }).catch(() => undefined);
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+// import axios from 'axios';
 import {
   Container,
   Paper,
@@ -24,6 +25,9 @@ import {
   Person,
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
+import { useQuery } from '@apollo/client/react';
+import { GET_HOTEL } from '../../graphql/hotelQueries';
+import { GET_AVAILABLE_ROOMS, GET_ROOMS } from '../../graphql/roomQueries';
 import type { Hotel } from '../../types';
 
 interface BookingFormData {
@@ -58,58 +62,35 @@ const HotelBooking: React.FC = () => {
   const watchCheckOut = watch('checkOutDate');
   const watchGuests = watch('guests');
 
-  // Mock hotel data (in real app, fetch by hotelId)
-  const hotel: Hotel = {
-    id: hotelId || '1',
-    name: 'Grand Palace Hotel',
-    description: 'Luxury hotel in the heart of the city with world-class amenities',
-    address: '123 Main Street',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    country: 'India',
-    postalCode: '400001',
-    phone: '+91 9876543210',
-    email: 'info@grandpalace.com',
-    latitude: 19.0760,
-    longitude: 72.8777,
-    rating: 4.5,
-    amenities: ['WiFi', 'Pool', 'Spa', 'Gym', 'Restaurant'],
-    images: ['/api/placeholder/600/400'],
-    isActive: true,
-    policies: 'Check-in: 2 PM, Check-out: 11 AM',
-    checkInTime: '14:00',
-    checkOutTime: '11:00',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-  };
+  const { data: hotelData, loading: hotelLoading, error: hotelError } = useQuery(GET_HOTEL as any, { variables: { id: hotelId }, skip: !hotelId });
+  const hotel: Hotel | undefined = (hotelData as any)?.getHotel;
 
-  // Mock room types
-  const roomTypes = [
-    {
-      id: '1',
-      type: 'Standard Room',
-      price: 3500,
-      description: 'Comfortable room with city view',
-      amenities: ['AC', 'WiFi', 'TV', 'Mini Bar'],
-      maxGuests: 2,
-    },
-    {
-      id: '2',
-      type: 'Deluxe Room',
-      price: 5500,
-      description: 'Spacious room with premium amenities',
-      amenities: ['AC', 'WiFi', 'TV', 'Mini Bar', 'Balcony'],
-      maxGuests: 3,
-    },
-    {
-      id: '3',
-      type: 'Suite',
-      price: 8500,
-      description: 'Luxury suite with separate living area',
-      amenities: ['AC', 'WiFi', 'TV', 'Mini Bar', 'Balcony', 'Living Room'],
-      maxGuests: 4,
-    },
-  ];
+  const { data: availableRoomsData } = useQuery(GET_AVAILABLE_ROOMS as any, {
+    variables: hotel && watchCheckIn && watchCheckOut ? {
+      hotelId: hotel.id,
+      checkInDate: watchCheckIn?.toISOString(),
+      checkOutDate: watchCheckOut?.toISOString(),
+    } : undefined,
+    skip: !hotel || !watchCheckIn || !watchCheckOut,
+  });
+
+  // Fallback: list all rooms for the hotel when dates are not chosen yet
+  const { data: roomsData } = useQuery(GET_ROOMS as any, {
+    variables: { hotelId: hotel?.id },
+    skip: !hotel || !!(watchCheckIn && watchCheckOut),
+  });
+
+  const roomTypes = useMemo(() => {
+    const rooms = (availableRoomsData as any)?.getAvailableRooms || (roomsData as any)?.getRooms || (hotel as any)?.rooms || [];
+    return rooms.map((r: any) => ({
+      id: r.id,
+      type: r.type,
+      price: r.pricePerNight,
+      description: r.description || '',
+      amenities: r.amenities || [],
+      capacity: r.capacity || 1,
+    }));
+  }, [availableRoomsData, roomsData, hotel]);
 
   const calculateNights = () => {
     if (watchCheckIn && watchCheckOut) {
@@ -128,23 +109,38 @@ const HotelBooking: React.FC = () => {
     return 0;
   };
 
-  const onSubmit = (data: BookingFormData) => {
+  const onSubmit = async (data: BookingFormData) => {
     if (!selectedRoom) {
       alert('Please select a room type');
       return;
     }
 
     const bookingData = {
-      hotel,
+      hotel: hotel!,
       room: selectedRoom,
       ...data,
       nights: calculateNights(),
       totalAmount: calculateTotal(),
     };
-
-    // Navigate to booking confirmation
+    // Proceed to confirmation first to let user review
     navigate('/booking-confirmation', { state: bookingData });
   };
+
+  if (hotelLoading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography>Loading hotel...</Typography>
+      </Container>
+    );
+  }
+
+  if (hotelError || !hotel) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography color="error">{hotelError ? String(hotelError.message) : 'Hotel not found'}</Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -155,32 +151,32 @@ const HotelBooking: React.FC = () => {
             <CardMedia
               component="img"
               height="300"
-              image={hotel.images?.[0] || '/api/placeholder/600/400'}
-              alt={hotel.name}
+              image={"https://placehold.co/600x400"}
+              alt={hotel?.name || 'Hotel'}
             />
           </Box>
           <Box sx={{ flex: 1 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h4" component="h1" gutterBottom>
-                {hotel.name}
+                {hotel?.name || 'Hotel'}
               </Typography>
               <Box display="flex" alignItems="center" mb={2}>
                 <LocationOn color="action" sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
-                  {hotel.address}, {hotel.city}, {hotel.state}
+                  {hotel?.address || '—'}, {hotel?.city || '—'}, {hotel?.state || '—'}
                 </Typography>
               </Box>
               <Box display="flex" alignItems="center" mb={2}>
                 <Star color="warning" sx={{ mr: 0.5 }} />
                 <Typography variant="body2" color="text.secondary">
-                  {hotel.rating} Rating
+                  {(hotel?.rating ?? 0)} Rating
                 </Typography>
               </Box>
               <Typography variant="body1" paragraph>
-                {hotel.description}
+                {hotel?.description || ''}
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={1}>
-                {hotel.amenities?.map((amenity) => (
+                {hotel?.amenities?.map((amenity) => (
                   <Chip
                     key={amenity}
                     label={amenity}
@@ -293,8 +289,8 @@ const HotelBooking: React.FC = () => {
             </Typography>
             <Box display="flex" flexDirection="column" gap={2}>
               {roomTypes
-                .filter(room => room.maxGuests >= watchGuests)
-                .map((room) => (
+                .filter((room: any) => room.capacity >= (watchGuests || 1))
+                .map((room: any) => (
                     <Card
                       key={room.id}
                       sx={{
@@ -319,12 +315,10 @@ const HotelBooking: React.FC = () => {
                         </Typography>
                         <Box display="flex" alignItems="center" mb={2}>
                           <Person sx={{ mr: 1, fontSize: 20 }} />
-                          <Typography variant="body2">
-                            Max {room.maxGuests} guests
-                          </Typography>
+                          <Typography variant="body2">Max {room.capacity} guests</Typography>
                         </Box>
                         <Box display="flex" flexWrap="wrap" gap={1}>
-                          {room.amenities.map((amenity) => (
+                          {room.amenities.map((amenity: any) => (
                             <Chip
                               key={amenity}
                               label={amenity}

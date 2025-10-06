@@ -1,4 +1,5 @@
 import React from 'react';
+import { useQuery } from '@apollo/client/react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -9,16 +10,20 @@ import {
 } from '@mui/material';
 import { Hotel, BookOnline, Payment } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { GET_USER_BOOKINGS } from '../../graphql/bookingQueries';
 
 const CustomerDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { data, loading, error } = useQuery(GET_USER_BOOKINGS, {
+    variables: { userId: user?.id },
+    skip: !user?.id,
+  });
   const navigate = useNavigate();
 
-  const mockStats = {
-    upcomingBookings: 2,
-    completedBookings: 5,
-    totalSpent: 15750,
-  };
+  const bookings = (data as any)?.getBookings ?? [];
+  const upcomingBookings = bookings.filter((b: any) => ['PENDING', 'CONFIRMED'].includes((b.status || '').toUpperCase())).length;
+  const completedBookings = bookings.filter((b: any) => (b.status || '').toUpperCase() === 'COMPLETED').length;
+  const totalSpent = bookings.filter((b: any) => (b.status || '').toUpperCase() === 'COMPLETED').reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
 
   const quickActions = [
     {
@@ -79,7 +84,7 @@ const CustomerDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}
           >
-            {mockStats.upcomingBookings}
+            {loading ? '…' : upcomingBookings}
           </Typography>
           <Typography 
             variant="h6" 
@@ -97,7 +102,7 @@ const CustomerDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}
           >
-            {mockStats.completedBookings}
+            {loading ? '…' : completedBookings}
           </Typography>
           <Typography 
             variant="h6" 
@@ -115,7 +120,7 @@ const CustomerDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' } }}
           >
-            ₹{mockStats.totalSpent.toLocaleString()}
+            {loading ? '…' : `₹${totalSpent.toLocaleString()}`}
           </Typography>
           <Typography 
             variant="h6" 
@@ -188,17 +193,20 @@ const CustomerDashboard: React.FC = () => {
         <Typography variant="h6" gutterBottom>
           Recent Activity
         </Typography>
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            • Booking confirmed for Grand Palace Hotel - Check-in: Dec 25, 2024
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            • Payment completed for Ocean View Resort - ₹8,500
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            • Review submitted for Mountain Retreat Inn - 5 stars
-          </Typography>
-        </Box>
+        {error ? (
+          <Typography variant="body2" color="error">Failed to load activity: {error.message}</Typography>
+        ) : (
+          <Box>
+            {(bookings || []).slice(0, 3).map((b: any) => (
+              <Typography key={b.id} variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                • {String(b.status).toUpperCase()} - {new Date(b.checkInDate).toLocaleDateString()} at Room {b?.room?.roomNumber}
+              </Typography>
+            ))}
+            {!loading && bookings.length === 0 && (
+              <Typography variant="body2" color="text.secondary">No recent activity</Typography>
+            )}
+          </Box>
+        )}
         <Button variant="outlined" sx={{ mt: 2 }}>
           View All Activity
         </Button>

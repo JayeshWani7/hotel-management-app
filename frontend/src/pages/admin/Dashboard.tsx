@@ -1,4 +1,5 @@
 import React from 'react';
+import { useQuery } from '@apollo/client/react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -17,19 +18,22 @@ import {
   TrendingUp,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { GET_HOTELS } from '../../graphql/hotelQueries';
+import { GET_ALL_BOOKINGS } from '../../graphql/bookingQueries';
 
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
+  const { data: hotelsData, loading: hotelsLoading } = useQuery(GET_HOTELS);
+  const { data: bookingsData, loading: bookingsLoading } = useQuery(GET_ALL_BOOKINGS);
   const navigate = useNavigate();
 
-  const mockStats = {
-    totalHotels: 15,
-    totalRooms: 234,
-    activeBookings: 89,
-    totalRevenue: 2456700,
-    totalUsers: 1247,
-    occupancyRate: 78.5,
-  };
+  const hotels = hotelsData?.getHotels ?? [];
+  const totalHotels = hotels.length;
+  const totalRooms = hotels.reduce((sum: number, h: any) => sum + (h.rooms?.length || 0), 0);
+  const bookings = bookingsData?.getAllBookings ?? [];
+  const activeBookings = bookings.filter((b: any) => ['PENDING','CONFIRMED'].includes(String(b.status).toUpperCase())).length;
+  const totalRevenue = bookings.reduce((sum: number, b: any) => sum + (b.totalAmount || 0), 0);
+  const occupancyRate = bookings.length && totalRooms ? Math.min(100, Math.round((activeBookings / totalRooms) * 1000) / 10) : 0;
 
   const recentActivity = [
     { action: 'New hotel registration', details: 'Luxury Suites Downtown', time: '2 hours ago' },
@@ -114,7 +118,7 @@ const AdminDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
           >
-            {mockStats.totalHotels}
+            {hotelsLoading ? '…' : totalHotels}
           </Typography>
           <Typography 
             variant="body2" 
@@ -137,7 +141,7 @@ const AdminDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
           >
-            {mockStats.totalRooms}
+            {hotelsLoading ? '…' : totalRooms}
           </Typography>
           <Typography 
             variant="body2" 
@@ -160,7 +164,7 @@ const AdminDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
           >
-            {mockStats.activeBookings}
+            {bookingsLoading ? '…' : activeBookings}
           </Typography>
           <Typography 
             variant="body2" 
@@ -183,7 +187,7 @@ const AdminDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}
           >
-            ₹{(mockStats.totalRevenue / 100000).toFixed(1)}L
+            {bookingsLoading ? '…' : `₹${(totalRevenue / 100000).toFixed(1)}L`}
           </Typography>
           <Typography 
             variant="body2" 
@@ -206,7 +210,8 @@ const AdminDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2.125rem' } }}
           >
-            {mockStats.totalUsers.toLocaleString()}
+            {/* Placeholder; wire when users UI exists */}
+            —
           </Typography>
           <Typography 
             variant="body2" 
@@ -229,7 +234,7 @@ const AdminDashboard: React.FC = () => {
             gutterBottom
             sx={{ fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2.125rem' } }}
           >
-            {mockStats.occupancyRate}%
+            {hotelsLoading || bookingsLoading ? '…' : `${occupancyRate}%`}
           </Typography>
           <Typography 
             variant="body2" 
