@@ -54,11 +54,11 @@ const HotelCard: React.FC<HotelCardProps> = ({
   };
 
   return (
-    <Card sx={{ 
+    <Card sx={{
       width: '100%',
-      maxWidth: { xs: '100%', sm: 345 }, 
-      height: '100%', 
-      display: 'flex', 
+      maxWidth: { xs: '100%', sm: 345 },
+      height: '100%',
+      display: 'flex',
       flexDirection: 'column',
       mx: 'auto'
     }}>
@@ -70,16 +70,16 @@ const HotelCard: React.FC<HotelCardProps> = ({
         sx={{ objectFit: 'cover' }}
       />
       <CardContent sx={{ flexGrow: 1, p: { xs: 2, sm: 2, md: 3 } }}>
-        <Typography 
-          gutterBottom 
-          variant="h5" 
-          component="div" 
+        <Typography
+          gutterBottom
+          variant="h5"
+          component="div"
           noWrap
           sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' } }}
         >
           {hotel.name}
         </Typography>
-        
+
         <Box display="flex" alignItems="center" mb={1}>
           <LocationOn sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
           <Typography variant="body2" color="text.secondary" noWrap>
@@ -117,17 +117,17 @@ const HotelCard: React.FC<HotelCardProps> = ({
         </Box>
 
         <Box display="flex" justifyContent="space-between" alignItems="center" gap={1}>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             size="small"
             onClick={handleView}
           >
             View Details
           </Button>
-          
+
           {showBooking && (
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               size="small"
               onClick={handleBook}
               color="primary"
@@ -135,7 +135,7 @@ const HotelCard: React.FC<HotelCardProps> = ({
               Book Now
             </Button>
           )}
-          
+
           {showActions && (
             <Box>
               <IconButton size="small" onClick={handleView}>
