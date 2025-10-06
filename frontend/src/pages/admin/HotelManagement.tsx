@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
+
   Card,
   CardContent,
   Divider,
@@ -91,17 +91,20 @@ const AdminHotelManagement: React.FC = () => {
 
   const handleFormSubmit = async (data: HotelFormData) => {
     try {
+      // Remove isActive field from data as it's not in CreateHotelInput
+      const { isActive, ...hotelData } = data;
+      
       if (editingHotel) {
         await updateHotelMutation({ 
           variables: { 
             id: editingHotel.id, 
-            updateHotelInput: data 
+            updateHotelInput: hotelData 
           } 
         });
       } else {
         await createHotelMutation({ 
           variables: { 
-            createHotelInput: data 
+            createHotelInput: hotelData 
           } 
         });
       }
@@ -110,6 +113,8 @@ const AdminHotelManagement: React.FC = () => {
       setEditingHotel(null);
     } catch (err) {
       console.error('Failed to save hotel:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      alert(`Failed to ${editingHotel ? 'update' : 'create'} hotel: ${errorMessage}`);
     }
   };
 
@@ -149,79 +154,71 @@ const AdminHotelManagement: React.FC = () => {
       </Box>
 
       {/* Summary Cards */}
-      <Grid container spacing={3} mb={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" gap={2}>
-                <HotelIcon color="primary" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Hotels
-                  </Typography>
-                  <Typography variant="h4">
-                    {hotels.length}
-                  </Typography>
-                </Box>
+      <Box display="flex" flexWrap="wrap" gap={3} mb={3}>
+        <Card sx={{ flex: '1 1 250px' }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2}>
+              <HotelIcon color="primary" sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography color="textSecondary" gutterBottom>
+                  Total Hotels
+                </Typography>
+                <Typography variant="h4">
+                  {hotels.length}
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" gap={2}>
-                <LocationOn color="secondary" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Cities
-                  </Typography>
-                  <Typography variant="h4">
-                    {new Set(hotels.map(h => h.city)).size}
-                  </Typography>
-                </Box>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ flex: '1 1 250px' }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2}>
+              <LocationOn color="secondary" sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography color="textSecondary" gutterBottom>
+                  Cities
+                </Typography>
+                <Typography variant="h4">
+                  {new Set(hotels.map(h => h.city)).size}
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Star color="warning" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Avg Rating
-                  </Typography>
-                  <Typography variant="h4">
-                    {hotels.length > 0 
-                      ? (hotels.reduce((sum, h) => sum + h.rating, 0) / hotels.length).toFixed(1)
-                      : '0'
-                    }
-                  </Typography>
-                </Box>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ flex: '1 1 250px' }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Star color="warning" sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography color="textSecondary" gutterBottom>
+                  Avg Rating
+                </Typography>
+                <Typography variant="h4">
+                  {hotels.length > 0 
+                    ? (hotels.reduce((sum, h) => sum + h.rating, 0) / hotels.length).toFixed(1)
+                    : '0'
+                  }
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" gap={2}>
-                <HotelIcon color="success" sx={{ fontSize: 40 }} />
-                <Box>
-                  <Typography color="textSecondary" gutterBottom>
-                    Active Hotels
-                  </Typography>
-                  <Typography variant="h4">
-                    {hotels.filter(h => h.isActive).length}
-                  </Typography>
-                </Box>
+            </Box>
+          </CardContent>
+        </Card>
+        <Card sx={{ flex: '1 1 250px' }}>
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2}>
+              <HotelIcon color="success" sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography color="textSecondary" gutterBottom>
+                  Active Hotels
+                </Typography>
+                <Typography variant="h4">
+                  {hotels.filter(h => h.isActive).length}
+                </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* Hotels Table */}
       <Paper>
