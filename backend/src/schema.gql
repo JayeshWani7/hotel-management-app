@@ -108,9 +108,7 @@ type Hotel {
 }
 
 type InitiatePaymentResponseDto {
-  orderId: String!
-  orderToken: String
-  paymentSessionId: String!
+  paymentLink: String!
 }
 
 input LoginUserInput {
@@ -132,7 +130,6 @@ type Mutation {
   register(registerUserInput: RegisterUserInput!): AuthResponse!
   updateBooking(id: String!, updateBookingInput: UpdateBookingInput!): Booking!
   updateHotel(id: String!, updateHotelInput: UpdateHotelInput!): Hotel!
-  updateProfile(updateUserInput: UpdateUserInput!): User!
   updateRoom(id: String!, updateRoomInput: UpdateRoomInput!): Room!
   verifyPayment(orderId: String!): Boolean!
 }
@@ -176,6 +173,7 @@ type Query {
   getAllBookings: [Booking!]!
   getAvailableRooms(checkInDate: DateTime!, checkOutDate: DateTime!, hotelId: String!): [Room!]!
   getBooking(id: String!): Booking!
+  getBookingByCashFreeOrderID(linkId: String!): Booking!
   getBookings(userId: String): [Booking!]!
   getHotel(id: String!): Hotel!
   getHotels: [Hotel!]!
@@ -274,13 +272,6 @@ input UpdateRoomInput {
   size: Int
   status: RoomStatus
   type: RoomType
-}
-
-input UpdateUserInput {
-  firstName: String
-  lastName: String
-  phone: String
-  profileImage: String
 }
 
 type User {

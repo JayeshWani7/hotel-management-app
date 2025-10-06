@@ -44,6 +44,12 @@ export class BookingsResolver {
     return this.bookingsService.findOne(id);
   }
 
+  @Query(() => Booking)
+  @UseGuards(JwtAuthGuard)
+  async getBookingByCashFreeOrderID(@Args('linkId') id: string): Promise<Booking> {
+    return this.bookingsService.findOneByLink(id);
+  }
+
   @Mutation(() => Booking)
   @UseGuards(JwtAuthGuard)
   async updateBooking(

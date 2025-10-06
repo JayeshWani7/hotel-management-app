@@ -8,8 +8,7 @@ import {
   TextField,
   Button,
   Divider,
-  Card,
-  CardContent,
+
   FormControl,
   InputLabel,
   Select,
@@ -82,7 +81,7 @@ const Payment: React.FC = () => {
       setIsProcessing(true);
       // 1) Create Cashfree order via REST
       const res = await axios.post('/api/payments/create-order', { bookingId: String(bookingData.bookingId) });
-      const { orderId, paymentSessionId, orderToken, payment_link } = res.data || {};
+      const { orderId, payment_link } = res.data || {};
 
       // 2) Redirect to Cashfree hosted page (redirect flow)
       if (payment_link) {

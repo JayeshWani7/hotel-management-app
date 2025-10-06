@@ -1,9 +1,11 @@
 // User types
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  HOTEL_MANAGER = 'hotel_manager',
-}
+export const UserRole = {
+  USER: 'user',
+  ADMIN: 'admin',
+  HOTEL_MANAGER: 'hotel_manager',
+} as const;
+
+export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export interface User {
   id: string;
@@ -44,20 +46,24 @@ export interface Hotel {
 }
 
 // Room types
-export enum RoomType {
-  SINGLE = 'single',
-  DOUBLE = 'double',
-  DELUXE = 'deluxe',
-  SUITE = 'suite',
-  FAMILY = 'family',
-}
+export const RoomType = {
+  SINGLE: 'single',
+  DOUBLE: 'double',
+  DELUXE: 'deluxe',
+  SUITE: 'suite',
+  FAMILY: 'family',
+} as const;
 
-export enum RoomStatus {
-  AVAILABLE = 'available',
-  OCCUPIED = 'occupied',
-  MAINTENANCE = 'maintenance',
-  OUT_OF_ORDER = 'out_of_order',
-}
+export type RoomType = typeof RoomType[keyof typeof RoomType];
+
+export const RoomStatus = {
+  AVAILABLE: 'available',
+  OCCUPIED: 'occupied',
+  MAINTENANCE: 'maintenance',
+  OUT_OF_ORDER: 'out_of_order',
+} as const;
+
+export type RoomStatus = typeof RoomStatus[keyof typeof RoomStatus];
 
 export interface Room {
   id: string;
@@ -79,13 +85,15 @@ export interface Room {
 }
 
 // Booking types
-export enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed',
-  NO_SHOW = 'no_show',
-}
+export const BookingStatus = {
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  CANCELLED: 'cancelled',
+  COMPLETED: 'completed',
+  NO_SHOW: 'no_show',
+} as const;
+
+export type BookingStatus = typeof BookingStatus[keyof typeof BookingStatus];
 
 export interface Booking {
   id: string;
@@ -108,21 +116,25 @@ export interface Booking {
 }
 
 // Payment types
-export enum PaymentStatus {
-  PENDING = 'pending',
-  SUCCESS = 'success',
-  FAILED = 'failed',
-  REFUNDED = 'refunded',
-  PARTIALLY_REFUNDED = 'partially_refunded',
-}
+export const PaymentStatus = {
+  PENDING: 'pending',
+  SUCCESS: 'success',
+  FAILED: 'failed',
+  REFUNDED: 'refunded',
+  PARTIALLY_REFUNDED: 'partially_refunded',
+} as const;
 
-export enum PaymentMethod {
-  CREDIT_CARD = 'credit_card',
-  DEBIT_CARD = 'debit_card',
-  UPI = 'upi',
-  NET_BANKING = 'net_banking',
-  WALLET = 'wallet',
-}
+export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
+
+export const PaymentMethod = {
+  CREDIT_CARD: 'credit_card',
+  DEBIT_CARD: 'debit_card',
+  UPI: 'upi',
+  NET_BANKING: 'net_banking',
+  WALLET: 'wallet',
+} as const;
+
+export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
 
 export interface Payment {
   id: string;
