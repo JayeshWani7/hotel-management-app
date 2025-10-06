@@ -46,7 +46,8 @@ const Register: React.FC = () => {
         setError('Passwords do not match');
         return;
       }
-      await registerUser(data);
+      const { confirmPassword, ...safeData } = data;
+      await registerUser(safeData);
     } catch (err) {
       setError('Registration failed. Please try again.');
     }
@@ -151,6 +152,7 @@ const Register: React.FC = () => {
                   <Select {...field} label="Role">
                     <MenuItem value={UserRole.USER}>Customer</MenuItem>
                     <MenuItem value={UserRole.HOTEL_MANAGER}>Hotel Manager</MenuItem>
+                    <MenuItem value={UserRole.ADMIN}>Admin</MenuItem>
 
                   </Select>
                 )}

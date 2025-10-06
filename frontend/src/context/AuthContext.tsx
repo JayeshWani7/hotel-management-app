@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useMutation } from '@apollo/client/react';
 import type { ReactNode } from 'react';
 import type { User, AuthContextType, RegisterForm } from '../types';
+import { LOGIN_USER, REGISTER_USER } from '../graphql/mutation';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -15,63 +17,54 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!user && !!token;
 
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // TODO: Replace with actual API call
-      console.log('Login attempt:', { email, password });
-      
-      // Mock successful login
-      const mockUser: User = {
-        id: '1',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: email,
-        role: 'user' as any,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      const mockToken = 'mock-jwt-token';
-      
-      setUser(mockUser);
-      setToken(mockToken);
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [loginMutation] = useMutation(LOGIN_USER);
+  const [registerMutation] = useMutation(REGISTER_USER);
+const login = async (email: string, password: string) => {
+  setIsLoading(true);
+  try {
+    const { data } = await loginMutation({
+      variables: {
+        loginUserInput: {
+          email,
+          password,
+        },
+      },
+    });
+
+    const { user: loggedInUser, token: jwtToken } = data.login;
+
+    setUser(loggedInUser);
+    setToken(jwtToken);
+
+    localStorage.setItem('token', jwtToken);
+    localStorage.setItem('user', JSON.stringify(loggedInUser));
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const register = async (userData: RegisterForm) => {
     setIsLoading(true);
     try {
-      // TODO: Replace with actual API call
-      console.log('Register attempt:', userData);
+      const { data } = await registerMutation({
+        variables: {
+    registerUserInput: {...userData,
+      role: userData.role?.toUpperCase(),}
+  },
+      });
       
-      // Mock successful registration
-      const mockUser: User = {
-        id: '1',
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        phone: userData.phone,
-        role: userData.role || 'user' as any,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      const mockToken = 'mock-jwt-token';
-      
-      setUser(mockUser);
-      setToken(mockToken);
-      localStorage.setItem('token', mockToken);
-      localStorage.setItem('user', JSON.stringify(mockUser));
+
+      const { user: registeredUser, token: jwtToken } = data.register;
+
+      setUser(registeredUser);
+      setToken(jwtToken);
+
+      localStorage.setItem('token', jwtToken);
+      localStorage.setItem('user', JSON.stringify(registeredUser));
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -87,8 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  // Initialize user from localStorage on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser && token) {
       try {
@@ -115,7 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
