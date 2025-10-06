@@ -40,10 +40,38 @@ const AdminDashboard: React.FC = () => {
   ];
 
   const quickActions = [
-    { title: 'Add Hotel', icon: <Hotel />, color: 'primary', path: '/admin/hotels' },
-    { title: 'Add Room', icon: <MeetingRoom />, color: 'secondary', path: '/admin/rooms' },
-    { title: 'View Bookings', icon: <BookOnline />, color: 'info', path: '/admin/bookings' },
-    { title: 'Revenue Report', icon: <Payment />, color: 'success', path: '/admin/reports' },
+    { 
+      title: 'Manage Hotels', 
+      icon: <Hotel />, 
+      color: 'primary', 
+      path: '/admin/hotels', 
+      description: 'Create and manage hotels',
+      implemented: true
+    },
+    { 
+      title: 'View Bookings', 
+      icon: <BookOnline />, 
+      color: 'info', 
+      path: '/admin/bookings', 
+      description: 'Manage all bookings and reservations',
+      implemented: true
+    },
+    { 
+      title: 'User Management', 
+      icon: <People />, 
+      color: 'warning', 
+      path: '/admin/users', 
+      description: 'Manage user accounts (Coming Soon)',
+      implemented: false
+    },
+    { 
+      title: 'Revenue Reports', 
+      icon: <Payment />, 
+      color: 'success', 
+      path: '/admin/reports', 
+      description: 'View revenue and analytics (Coming Soon)',
+      implemented: false
+    },
   ];
 
   return (
@@ -218,31 +246,84 @@ const AdminDashboard: React.FC = () => {
         <Typography variant="h5" component="h2" gutterBottom>
           Quick Actions
         </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+          Access key management features with one click
+        </Typography>
         <Box 
           display="grid" 
           gridTemplateColumns={{ 
             xs: 'repeat(2, 1fr)', 
-            sm: 'repeat(4, 1fr)' 
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)' 
           }}
           gap={{ xs: 1.5, sm: 2 }}
         >
           {quickActions.map((action) => (
-            <Button
+            <Paper
               key={action.title}
-              variant="outlined"
-              size={window.innerWidth < 600 ? "medium" : "large"}
-              startIcon={action.icon}
-              onClick={() => navigate(action.path)}
               sx={{ 
-                p: { xs: 1.5, sm: 2 },
-                height: 'auto',
-                flexDirection: 'column',
-                gap: { xs: 0.5, sm: 1 },
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                p: { xs: 2, sm: 2.5 },
+                cursor: action.implemented ? 'pointer' : 'not-allowed',
+                opacity: action.implemented ? 1 : 0.7,
+                transition: 'all 0.2s',
+                '&:hover': action.implemented ? {
+                  boxShadow: 3,
+                  transform: 'translateY(-2px)'
+                } : {},
+                position: 'relative'
               }}
+              onClick={() => action.implemented && navigate(action.path)}
             >
-              {action.title}
-            </Button>
+              <Box display="flex" flexDirection="column" alignItems="center" textAlign="center">
+                <Box 
+                  sx={{ 
+                    color: action.implemented ? `${action.color}.main` : 'text.disabled',
+                    mb: 1.5
+                  }}
+                >
+                  {React.cloneElement(action.icon, { 
+                    sx: { fontSize: { xs: 32, sm: 40 } } 
+                  })}
+                </Box>
+                <Typography 
+                  variant="h6" 
+                  component="h3" 
+                  gutterBottom
+                  sx={{ 
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    fontWeight: 600,
+                    color: action.implemented ? 'inherit' : 'text.disabled'
+                  }}
+                >
+                  {action.title}
+                </Typography>
+                {action.description && (
+                  <Typography 
+                    variant="body2" 
+                    color={action.implemented ? "text.secondary" : "text.disabled"}
+                    sx={{ 
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      lineHeight: 1.4
+                    }}
+                  >
+                    {action.description}
+                  </Typography>
+                )}
+                {action.implemented && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: 'success.main'
+                    }}
+                  />
+                )}
+              </Box>
+            </Paper>
           ))}
         </Box>
       </Box>

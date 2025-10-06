@@ -11,40 +11,54 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  // Initialize both user and token from localStorage
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && storedUser !== 'undefined') {
+      try {
+        return JSON.parse(storedUser);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [token, setToken] = useState<string | null>(() => {
+    const storedToken = localStorage.getItem('token');
+    return storedToken && storedToken !== 'undefined' ? storedToken : null;
+  });
+
   const [isLoading, setIsLoading] = useState(false);
 
   const isAuthenticated = !!user && !!token;
 
   const [loginMutation] = useMutation(LOGIN_USER);
   const [registerMutation] = useMutation(REGISTER_USER);
-const login = async (email: string, password: string) => {
-  setIsLoading(true);
-  try {
-    const { data } = await loginMutation({
-      variables: {
-        loginUserInput: {
-          email,
-          password,
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const { data } = await loginMutation({
+        variables: {
+          loginUserInput: {
+            email,
+            password,
+          },
         },
-      },
-    });
+      });
 
-    const { user: loggedInUser, token: jwtToken } = data.login;
+      const { user: loggedInUser, accessToken } = (data as { login: { user: User; accessToken: string } }).login;
 
-    setUser(loggedInUser);
-    setToken(jwtToken);
-
-    localStorage.setItem('token', jwtToken);
-    localStorage.setItem('user', JSON.stringify(loggedInUser));
-  } catch (error) {
-    console.error('Login failed:', error);
-    throw error;
-  } finally {
-    setIsLoading(false);
-  }
-};
+      setUser(loggedInUser);
+      setToken(accessToken);
+      // localStorage is handled by useEffect
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
   const register = async (userData: RegisterForm) => {
@@ -52,19 +66,19 @@ const login = async (email: string, password: string) => {
     try {
       const { data } = await registerMutation({
         variables: {
-    registerUserInput: {...userData,
-      role: userData.role?.toUpperCase(),}
-  },
+          registerUserInput: {
+            ...userData,
+            // Don't modify the role, use it as is since our enum values are lowercase
+          }
+        },
       });
-      
 
-      const { user: registeredUser, token: jwtToken } = data.register;
+
+      const { user: registeredUser, accessToken } = (data as { register: { user: User; accessToken: string } }).register;
 
       setUser(registeredUser);
-      setToken(jwtToken);
-
-      localStorage.setItem('token', jwtToken);
-      localStorage.setItem('user', JSON.stringify(registeredUser));
+      setToken(accessToken);
+      // localStorage is handled by useEffect
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -76,21 +90,20 @@ const login = async (email: string, password: string) => {
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // localStorage cleanup is handled by useEffect
   };
 
+  // Sync localStorage with state when they change
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser && token) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        logout();
-      }
+    if (user && token) {
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
+    } else {
+      // If either user or token is null, clear both from localStorage
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
     }
-  }, [token]);
+  }, [user, token]);
 
   const value: AuthContextType = {
     user,
