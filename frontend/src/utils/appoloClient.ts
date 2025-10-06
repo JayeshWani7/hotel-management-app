@@ -1,22 +1,25 @@
-// src/apollo/client.ts
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, from } from '@apollo/client';
 
-const httpLink = createHttpLink({
-  uri: 'http://localhost:3000/graphql', // Your backend URL
+// HTTP connection to your backend
+const httpLink = new HttpLink({
+  uri: 'http://localhost:3000/graphql',
 });
 
-const authLink = setContext((_, { headers }) => {
+// Auth middleware
+const authLink = new ApolloLink((operation, forward) => {
   const token = localStorage.getItem('token');
-  return {
-    headers: {
-      ...headers,
-      Authorization: token ? `Bearer ${token}` : '',
-    },
-  };
+  if (token) {
+    operation.setContext({
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+  return forward(operation);
 });
 
+// Create Apollo Client
 export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: from([authLink, httpLink]),
   cache: new InMemoryCache(),
 });
