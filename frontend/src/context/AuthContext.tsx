@@ -68,6 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         variables: {
           registerUserInput: {
             ...userData,
+            role: userData.role?.toUpperCase(),
             // Don't modify the role, use it as is since our enum values are lowercase
           }
         },

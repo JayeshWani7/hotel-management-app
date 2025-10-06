@@ -5,6 +5,7 @@ import { Booking, BookingStatus } from './entities/booking.entity';
 import { CreateBookingInput, UpdateBookingInput, CancelBookingInput } from './dto/booking.input';
 import { RoomsService } from '../rooms/rooms.service';
 import { UsersService } from '../users/users.service';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class BookingsService {
@@ -13,6 +14,7 @@ export class BookingsService {
     private bookingsRepository: Repository<Booking>,
     private roomsService: RoomsService,
     private usersService: UsersService,
+    private paymentService: PaymentsService,
   ) {}
 
   async create(createBookingInput: CreateBookingInput, userId: string): Promise<Booking> {
@@ -52,7 +54,11 @@ export class BookingsService {
       checkOutDate: checkOut,
     });
 
-    return this.bookingsRepository.save(booking);
+    const savedBooking = await this.bookingsRepository.save(booking);
+     return this.bookingsRepository.findOne({
+      where: { id: savedBooking.id },
+      relations: ['room', 'room.hotel', 'user', 'payment'],
+    });
   }
 
   async findAll(): Promise<Booking[]> {
@@ -77,6 +83,22 @@ export class BookingsService {
 
     if (!booking) {
       throw new NotFoundException(`Booking with ID ${id} not found`);
+    }
+
+    return booking;
+  }
+  async findOneByLink(linkId: string): Promise<Booking> {
+    const payment = await this.paymentService.findOne(linkId);
+
+    if (!payment) {
+      throw new NotFoundException(`Payment with ID ${linkId} not found`);
+    }
+    const booking = await this.bookingsRepository.findOne({
+      where: {id : payment?.bookingId },
+      relations: ['user', 'room', 'room.hotel', 'payment'],
+    });
+    if (!booking) {
+      throw new NotFoundException(`Booking with ID ${linkId} not found`);
     }
 
     return booking;
