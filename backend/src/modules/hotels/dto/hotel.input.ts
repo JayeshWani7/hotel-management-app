@@ -128,6 +128,7 @@ export class UpdateHotelInput {
   @Min(0)
   @Max(5)
   rating?: number;
+  
 
   @Field(() => [String], { nullable: true })
   @IsOptional()

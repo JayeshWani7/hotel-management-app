@@ -38,14 +38,20 @@ export class HotelsService {
 
   async update(id: string, updateHotelInput: UpdateHotelInput): Promise<Hotel> {
     const hotel = await this.findOne(id);
+    if (!hotel) {
+      throw new NotFoundException(`Hotel with id ${id} not found`);
+    }
     Object.assign(hotel, updateHotelInput);
     return this.hotelsRepository.save(hotel);
   }
 
   async remove(id: string): Promise<boolean> {
-    const hotel = await this.findOne(id);
+    const hotel = await this.hotelsRepository.findOne({ where: { id } });
+    if (!hotel) {
+      throw new NotFoundException(`Hotel with id ${id} not found`);
+    }
     hotel.isActive = false;
-    await this.hotelsRepository.save(hotel);
+    await this.hotelsRepository.remove(hotel);
     return true;
   }
 

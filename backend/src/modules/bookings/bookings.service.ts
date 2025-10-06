@@ -86,6 +86,9 @@ export class BookingsService {
 
   async update(id: string, updateBookingInput: UpdateBookingInput): Promise<Booking> {
     const booking = await this.findOne(id);
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
 
     if (booking.status !== BookingStatus.PENDING) {
       throw new BadRequestException('Can only update pending bookings');
