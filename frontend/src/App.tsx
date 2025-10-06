@@ -6,6 +6,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Layout from './layouts/Layout';
 import CustomerDashboard from './pages/customer/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
+import BookingManagement from './pages/admin/BookingManagement';
+import AdminHotelManagement from './pages/admin/HotelManagement';
 import Hotels from './pages/customer/Hotels';
 import ProfilePage from './pages/ProfilePage';
 import HotelBooking from './components/bookings/HotelBooking';
@@ -38,8 +40,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: UserR
     return <Navigate to="/login" replace />;
   }
   
-  if (allowedRoles && !allowedRoles.includes(user.role.toLowerCase() as UserRole)) {
-    return <Navigate to="/unauthorized" replace />;
+  if (allowedRoles && allowedRoles.length > 0) {
+    const hasPermission = allowedRoles.some(role => 
+      role === user.role || 
+      role.toLowerCase() === user.role?.toLowerCase()
+    );
+    
+    if (!hasPermission) {
+      console.log('Access denied. User role:', user.role, 'Allowed roles:', allowedRoles);
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
   
   return <Layout>{children}</Layout>;
@@ -86,7 +96,7 @@ const AppRoutes: React.FC = () => {
         </ProtectedRoute>
       } />
       <Route path="/hotels" element={
-        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+        <ProtectedRoute allowedRoles={[UserRole.USER, UserRole.ADMIN, UserRole.HOTEL_MANAGER]}>
           <Hotels />
         </ProtectedRoute>
       } />
@@ -140,10 +150,7 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="/admin/hotels" element={
         <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.HOTEL_MANAGER]}>
-          <div style={{ padding: '2rem' }}>
-            <h2>Manage Hotels</h2>
-            <p>Hotel management page coming soon...</p>
-          </div>
+          <AdminHotelManagement />
         </ProtectedRoute>
       } />
       <Route path="/admin/rooms" element={
@@ -156,10 +163,7 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="/admin/bookings" element={
         <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.HOTEL_MANAGER]}>
-          <div style={{ padding: '2rem' }}>
-            <h2>All Bookings</h2>
-            <p>Booking management page coming soon...</p>
-          </div>
+          <BookingManagement />
         </ProtectedRoute>
       } />
       <Route path="/admin/users" element={

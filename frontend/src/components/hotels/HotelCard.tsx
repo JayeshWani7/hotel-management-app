@@ -125,16 +125,14 @@ const HotelCard: React.FC<HotelCardProps> = ({
             View Details
           </Button>
 
-          {showBooking && (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleBook}
-              color="primary"
-            >
-              Book Now
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleBook}
+            color="primary"
+          >
+            Book Now
+          </Button>
 
           {showActions && (
             <Box>

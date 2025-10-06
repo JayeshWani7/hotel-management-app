@@ -45,12 +45,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
   const adminMenuItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/admin/dashboard' },
     { text: 'Manage Hotels', icon: <Hotel />, path: '/admin/hotels' },
-    { text: 'Manage Rooms', icon: <MeetingRoom />, path: '/admin/rooms' },
     { text: 'All Bookings', icon: <BookOnline />, path: '/admin/bookings' },
-    { text: 'Payments', icon: <Payment />, path: '/admin/payments' },
-    { text: 'Users', icon: <People />, path: '/admin/users' },
-    { text: 'Analytics', icon: <Analytics />, path: '/admin/analytics' },
-    { text: 'Settings', icon: <Settings />, path: '/admin/settings' },
+    { text: 'User Management', icon: <People />, path: '/admin/users' },
+    { text: 'Revenue Reports', icon: <Analytics />, path: '/admin/reports' },
   ];
 
   const hotelManagerMenuItems = [

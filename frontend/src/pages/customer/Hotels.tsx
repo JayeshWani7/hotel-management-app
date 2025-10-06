@@ -63,9 +63,18 @@ const HotelsPage: React.FC = () => {
   const handleFormSubmit = async (data: HotelFormData) => {
     try {
       if (editingHotel) {
-        await updateHotelMutation({ variables: { id: editingHotel.id, input: data } });
+        await updateHotelMutation({ 
+          variables: { 
+            id: editingHotel.id, 
+            updateHotelInput: data 
+          } 
+        });
       } else {
-        await createHotelMutation({ variables: { input: data } });
+        await createHotelMutation({ 
+          variables: { 
+            createHotelInput: data 
+          } 
+        });
       }
       refetch();
       setShowForm(false);
