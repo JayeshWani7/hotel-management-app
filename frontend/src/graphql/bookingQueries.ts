@@ -37,7 +37,7 @@ export const GET_ALL_BOOKINGS = gql`
       payment {
         id
         amount
-        paymentMethod
+        method
         status
       }
     }
@@ -117,7 +117,7 @@ export const GET_BOOKING = gql`
       payment {
         id
         amount
-        paymentMethod
+        method
         status
       }
     }

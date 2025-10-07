@@ -20,7 +20,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
   Card,
   CardContent,
   Divider,
@@ -37,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_ALL_BOOKINGS, UPDATE_BOOKING, CANCEL_BOOKING } from '../../graphql/bookingQueries';
+import { useAuth } from '../../context/AuthContext';
 
 interface Booking {
   id: string;
@@ -72,12 +72,13 @@ interface Booking {
   payment?: {
     id: string;
     amount: number;
-    paymentMethod: string;
+    method: string;
     status: string;
   };
 }
 
 const BookingManagement: React.FC = () => {
+  //const { user, isAuthenticated } = useAuth();
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
@@ -86,11 +87,30 @@ const BookingManagement: React.FC = () => {
     notes: '',
   });
 
-  const { data, loading, refetch } = useQuery(GET_ALL_BOOKINGS);
+  // Define the expected GraphQL response type
+  interface GetAllBookingsResponse {
+    getAllBookings: Booking[];
+  }
+  
+  const { data, loading, error, refetch } = useQuery<GetAllBookingsResponse>(GET_ALL_BOOKINGS);
   const [updateBookingMutation] = useMutation(UPDATE_BOOKING);
   const [cancelBookingMutation] = useMutation(CANCEL_BOOKING);
 
   const bookings: Booking[] = data?.getAllBookings ?? [];
+
+  // Debug logging
+  // console.log('BookingManagement - User:', user);
+  // console.log('BookingManagement - IsAuthenticated:', isAuthenticated);
+  // console.log('BookingManagement - Query data:', data);
+  // console.log('BookingManagement - Loading:', loading);
+  // console.log('BookingManagement - Error:', error);
+  // console.log('BookingManagement - Bookings:', bookings);
+  // console.log('BookingManagement - Raw getAllBookings:', data?.getAllBookings);
+  
+  // Log token to check authentication
+  const token = localStorage.getItem('token');
+  console.log('BookingManagement - Token exists:', !!token);
+  console.log('BookingManagement - Token length:', token?.length);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -110,7 +130,7 @@ const BookingManagement: React.FC = () => {
       case 'cancelled': return <Cancel />;
       case 'completed': return <CheckCircle />;
       case 'no_show': return <PersonOff />;
-      default: return null;
+      default: return <CheckCircle />; // Default icon instead of null
     }
   };
 
@@ -167,6 +187,7 @@ const BookingManagement: React.FC = () => {
   };
 
   if (loading) return <Typography>Loading bookings...</Typography>;
+  if (error) return <Typography color="error">Error loading bookings: {error.message}</Typography>;
 
   return (
     <Box p={3}>
@@ -175,8 +196,8 @@ const BookingManagement: React.FC = () => {
       </Typography>
 
       {/* Summary Cards */}
-      <Grid container spacing={3} mb={3}>
-        <Grid item xs={12} sm={6} md={3}>
+      <Box display="flex" flexWrap="wrap" gap={3} mb={3}>
+        <Box flex="1 1 250px">
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
@@ -187,44 +208,44 @@ const BookingManagement: React.FC = () => {
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </Box>
+        <Box flex="1 1 250px">
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Pending
               </Typography>
               <Typography variant="h5">
-                {bookings.filter(b => b.status === 'pending').length}
+                {bookings.filter(b => b.status === 'PENDING').length}
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </Box>
+        <Box flex="1 1 250px">
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Confirmed
               </Typography>
               <Typography variant="h5">
-                {bookings.filter(b => b.status === 'confirmed').length}
+                {bookings.filter(b => b.status === 'CONFIRMED').length}
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        </Box>
+        <Box flex="1 1 250px">
           <Card>
             <CardContent>
               <Typography color="textSecondary" gutterBottom>
                 Revenue
               </Typography>
               <Typography variant="h5">
-                ${bookings.reduce((sum, b) => sum + b.totalAmount, 0).toFixed(2)}
+                ${bookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0).toFixed(2)}
               </Typography>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Bookings Table */}
       <TableContainer component={Paper}>
@@ -329,8 +350,8 @@ const BookingManagement: React.FC = () => {
         <DialogTitle>Booking Details</DialogTitle>
         <DialogContent>
           {selectedBooking && (
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+            <Box display="flex" flexWrap="wrap" gap={3}>
+              <Box flex="1 1 300px">
                 <Typography variant="h6" gutterBottom>
                   Guest Information
                 </Typography>
@@ -360,9 +381,9 @@ const BookingManagement: React.FC = () => {
                 <Typography>
                   <strong>Rate:</strong> ${selectedBooking.room.pricePerNight}/night
                 </Typography>
-              </Grid>
+              </Box>
               
-              <Grid item xs={12} md={6}>
+              <Box flex="1 1 300px">
                 <Typography variant="h6" gutterBottom>
                   Booking Information
                 </Typography>
@@ -418,15 +439,15 @@ const BookingManagement: React.FC = () => {
                       <strong>Amount:</strong> ${selectedBooking.payment.amount}
                     </Typography>
                     <Typography>
-                      <strong>Method:</strong> {selectedBooking.payment.paymentMethod}
+                      <strong>Method:</strong> {selectedBooking.payment.method}
                     </Typography>
                     <Typography>
                       <strong>Status:</strong> {selectedBooking.payment.status}
                     </Typography>
                   </>
                 )}
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           )}
         </DialogContent>
         <DialogActions>
