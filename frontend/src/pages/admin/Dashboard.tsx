@@ -41,6 +41,7 @@ const AdminDashboard: React.FC = () => {
     { action: 'Payment received', details: '₹12,500 from booking #BK-2024-001', time: '4 hours ago' },
     { action: 'User registration', details: 'john.doe@email.com', time: '6 hours ago' },
     { action: 'Room maintenance completed', details: 'Room 301 - Ocean View Resort', time: '1 day ago' },
+    { action: 'Room maintenance completed', details: 'Room 301 - Ocean View Resort', time: '1 day ago' },
   ];
 
   const quickActions = [
