@@ -1,6 +1,5 @@
 import { gql } from '@apollo/client';
 
-// --- existing query ---
 export const GET_ROOMS_BY_HOTEL = gql`
   query GetRooms($hotelId: String) {
     getRooms(hotelId: $hotelId) {
