@@ -54,9 +54,6 @@ export class BookingsService {
       checkOutDate: checkOut,
     });
 
-    const saved = await this.bookingsRepository.save(booking);
-    // Return with relations to satisfy non-nullable GraphQL fields
-    return this.findOne(saved.id);
     const savedBooking = await this.bookingsRepository.save(booking);
      return this.bookingsRepository.findOne({
       where: { id: savedBooking.id },

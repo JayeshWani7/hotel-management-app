@@ -18,11 +18,7 @@
 //   Person,
 //   MeetingRoom,
 //   Payment as PaymentIcon,
-// } from '@      const { data } = await createBookingMutation({
-        variables: { createBookingInput: bookingInput, userId:  user?.id},
-      });
-
-      const createdBookingId = (data as any)?.createBooking?.id;cons-material';
+// } from '@mui/icons-material';
 // import { INITIATE_PAYMENT } from '../graphql/paymentMutations';
 // import { useMutation } from '@apollo/client/react';
 
@@ -359,6 +355,7 @@ import {
   MeetingRoom,
   Payment as PaymentIcon,
 } from '@mui/icons-material';
+import { useMutation } from '@apollo/client/react';
 import { CREATE_BOOKING } from '../graphql/bookingQueries';
 import { useAuth } from '../context/AuthContext';
 
