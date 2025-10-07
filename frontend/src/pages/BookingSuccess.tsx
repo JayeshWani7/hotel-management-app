@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import { GET_BOOKING_BY_LINK } from "../graphql/bookingQueries";
+import axios from "axios";
 
 import {
   Container,
@@ -20,6 +21,11 @@ const BookingSuccess: React.FC = () => {
   const [searchParams] = useSearchParams();
   const linkId = searchParams.get("link_id");
   const [bookingData, setBookingData] = useState<any>(null);
+  
+  const orderId = useMemo(() => 
+    bookingData?.transactionId || bookingData?.orderId || searchParams.get('order_id') || searchParams.get('orderId') || '', 
+    [bookingData, searchParams]
+  );
 
   // Redirect if no link_id
   useEffect(() => {
@@ -36,8 +42,8 @@ const BookingSuccess: React.FC = () => {
 
   // Update state when data changes
   useEffect(() => {
-    if (data?.getBookingByCashFreeOrderID) {
-      setBookingData(data.getBookingByCashFreeOrderID);
+    if (data && (data as any).getBookingByCashFreeOrderID) {
+      setBookingData((data as any).getBookingByCashFreeOrderID);
     }
   }, [data]);
 
@@ -79,6 +85,12 @@ const BookingSuccess: React.FC = () => {
     return nights;
   };
   
+
+  // Optionally verify again on landing if query param provided
+  // (we avoid blocking UI; backend verification already done during Payment step)
+  if (orderId && !transactionId) {
+    axios.get(`/api/payments/verify`, { params: { order_id: orderId } }).catch(() => undefined);
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>

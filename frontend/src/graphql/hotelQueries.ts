@@ -29,6 +29,44 @@ export const GET_HOTELS = gql`
   }
 `;
 
+export const GET_HOTEL = gql`
+  query GetHotel($id: String!) {
+    getHotel(id: $id) {
+      id
+      name
+      description
+      address
+      city
+      state
+      country
+      postalCode
+      phone
+      email
+      latitude
+      longitude
+      rating
+      amenities
+      images
+      isActive
+      policies
+      checkInTime
+      checkOutTime
+      createdAt
+      updatedAt
+      rooms {
+        id
+        roomNumber
+        type
+        pricePerNight
+        capacity
+        amenities
+        images
+        isActive
+      }
+    }
+  }
+`;
+
 // Mutations
 export const CREATE_HOTEL = gql`
   mutation CreateHotel($createHotelInput: CreateHotelInput!) {

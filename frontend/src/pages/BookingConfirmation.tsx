@@ -104,7 +104,7 @@
 //         <Typography variant="h4" component="h1" gutterBottom textAlign="center">
 //           Booking Confirmation
 //         </Typography>
-        
+
 //         <Typography variant="body1" color="text.secondary" textAlign="center" mb={4}>
 //           Please review your booking details before proceeding to payment
 //         </Typography>
@@ -134,7 +134,7 @@
 //             <Typography variant="h6" gutterBottom>
 //               Booking Details
 //             </Typography>
-            
+
 //             <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} gap={3}>
 //               <Box>
 //                 <Box display="flex" alignItems="center" mb={2}>
@@ -153,7 +153,7 @@
 //                     </Typography>
 //                   </Box>
 //                 </Box>
-                
+
 //                 <Box display="flex" alignItems="center" mb={2}>
 //                   <Person color="action" sx={{ mr: 1 }} />
 //                   <Box>
@@ -184,7 +184,7 @@
 //                     </Typography>
 //                   </Box>
 //                 </Box>
-                
+
 //                 <Box display="flex" alignItems="center" mb={2}>
 //                   <MeetingRoom color="action" sx={{ mr: 1 }} />
 //                   <Box>
@@ -224,7 +224,7 @@
 //             <Typography variant="h6" gutterBottom>
 //               Room Information
 //             </Typography>
-            
+
 //             <Box mb={2}>
 //               <Typography variant="body1" fontWeight="medium">
 //                 {room.type}
@@ -232,7 +232,7 @@
 //               <Typography variant="body2" color="text.secondary" mb={2}>
 //                 {room.description}
 //               </Typography>
-              
+
 //               <Typography variant="body2" fontWeight="medium" mb={1}>
 //                 Amenities:
 //               </Typography>
@@ -256,7 +256,7 @@
 //             <Typography variant="h6" gutterBottom>
 //               Price Breakdown
 //             </Typography>
-            
+
 //             <Box display="flex" justifyContent="space-between" mb={1}>
 //               <Typography variant="body2">
 //                 {room.type} × {nights} {nights === 1 ? 'night' : 'nights'}
@@ -265,7 +265,7 @@
 //                 ₹{totalAmount.toLocaleString()}
 //               </Typography>
 //             </Box>
-            
+
 //             <Box display="flex" justifyContent="space-between" mb={1}>
 //               <Typography variant="body2">
 //                 Taxes & Fees (18% GST)
@@ -274,9 +274,9 @@
 //                 ₹{taxes.toLocaleString()}
 //               </Typography>
 //             </Box>
-            
+
 //             <Divider sx={{ my: 2 }} />
-            
+
 //             <Box display="flex" justifyContent="space-between">
 //               <Typography variant="h6">
 //                 Total Amount
@@ -298,7 +298,7 @@
 //           >
 //             Edit Booking
 //           </Button>
-          
+
 //           <Button
 //             variant="contained"
 //             size="large"
@@ -373,7 +373,7 @@ const BookingConfirmation: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const bookingData = location.state as BookingData;
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   const [createBooking] = useMutation(CREATE_BOOKING);
 
@@ -407,7 +407,7 @@ const BookingConfirmation: React.FC = () => {
       };
 
       const { data } = await createBooking({
-        variables: { createBookingInput: bookingInput, userId:  user?.id},
+        variables: { createBookingInput: bookingInput, userId: user?.id },
       });
 
       const createdBookingId = data.createBooking.id;

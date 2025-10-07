@@ -19,7 +19,7 @@ import {
   Payment,
   People,
   Analytics,
-  Settings,
+
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';

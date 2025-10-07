@@ -130,7 +130,6 @@ type Mutation {
   register(registerUserInput: RegisterUserInput!): AuthResponse!
   updateBooking(id: String!, updateBookingInput: UpdateBookingInput!): Booking!
   updateHotel(id: String!, updateHotelInput: UpdateHotelInput!): Hotel!
-  updateProfile(updateUserInput: UpdateUserInput!): User!
   updateRoom(id: String!, updateRoomInput: UpdateRoomInput!): Room!
   verifyPayment(orderId: String!): Boolean!
 }
@@ -273,13 +272,6 @@ input UpdateRoomInput {
   size: Int
   status: RoomStatus
   type: RoomType
-}
-
-input UpdateUserInput {
-  firstName: String
-  lastName: String
-  phone: String
-  profileImage: String
 }
 
 type User {

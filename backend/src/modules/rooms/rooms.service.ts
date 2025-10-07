@@ -71,23 +71,16 @@ export class RoomsService {
     checkOutDate: Date,
   ): Promise<Room[]> {
     return this.roomsRepository
-      .createQueryBuilder('room')
-      .leftJoinAndSelect('room.hotel', 'hotel')
-      .leftJoin(
-        'room.bookings',
-        'booking',
-        'booking.status NOT IN (:...excludedStatuses) AND NOT (booking.checkOutDate <= :checkIn OR booking.checkInDate >= :checkOut)',
-        {
-          excludedStatuses: ['cancelled'],
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-        }
-      )
-      .where('room.hotelId = :hotelId', { hotelId })
-      .andWhere('room.isActive = :isActive', { isActive: true })
-      .andWhere('room.status = :status', { status: RoomStatus.AVAILABLE })
-      .andWhere('booking.id IS NULL')
-      .getMany();
+  .createQueryBuilder('room')
+  .where('room.hotelId = :hotelId', { hotelId })
+  .andWhere('room.isActive = :isActive', { isActive: true })
+  .andWhere('room.status = :status', { status: RoomStatus.AVAILABLE })
+  .setParameters({
+    checkIn: checkInDate,
+    checkOut: checkOutDate,
+  })
+  .getMany();
+
   }
 
   async update(id: string, updateRoomInput: UpdateRoomInput): Promise<Room> {

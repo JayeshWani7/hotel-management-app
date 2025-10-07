@@ -8,8 +8,7 @@ import {
   TextField,
   Button,
   Divider,
-  Card,
-  CardContent,
+
   FormControl,
   InputLabel,
   Select,
@@ -24,6 +23,7 @@ import {
   Hotel,
 } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
+import axios from 'axios';
 
 interface PaymentFormData {
   cardNumber: string;
@@ -79,30 +79,18 @@ const Payment: React.FC = () => {
     try {
       setError('');
       setIsProcessing(true);
+      // 1) Create Cashfree order via REST
+      const res = await axios.post('/api/payments/create-order', { bookingId: String(bookingData.bookingId) });
+      const { orderId, payment_link } = res.data || {};
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // In real app, integrate with payment gateway like Razorpay, Stripe, etc.
-      const paymentResult = {
-        success: true,
-        transactionId: `TXN${Date.now()}`,
-        bookingId: `BK${Date.now()}`,
-      };
-
-      if (paymentResult.success) {
-        // Navigate to booking success page
-        navigate('/booking-success', {
-          state: {
-            ...bookingData,
-            transactionId: paymentResult.transactionId,
-            bookingId: paymentResult.bookingId,
-            paymentData: data,
-          },
-        });
-      } else {
-        throw new Error('Payment failed');
+      // 2) Redirect to Cashfree hosted page (redirect flow)
+      if (payment_link) {
+        window.location.href = payment_link;
+        return;
       }
+
+      // Fallback: if payment link not provided by backend, navigate to success with orderId (dev only)
+      navigate('/booking-success', { state: { ...bookingData, transactionId: orderId, paymentData: data } });
     } catch (err) {
       setError('Payment failed. Please try again.');
     } finally {

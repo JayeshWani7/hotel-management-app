@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useMutation } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import type { ReactNode } from 'react';
 import type { User, AuthContextType, RegisterForm } from '../types';
 import { LOGIN_USER, REGISTER_USER } from '../graphql/mutation';
+import { ME } from '../graphql/userQueries';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -35,6 +36,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const [loginMutation] = useMutation(LOGIN_USER);
   const [registerMutation] = useMutation(REGISTER_USER);
+
+  // Hydrate user from backend when token exists, to persist sessions accurately
+  const { data: meData, loading: meLoading, refetch: refetchMe } = useQuery(ME, {
+    skip: !localStorage.getItem('token'),
+    fetchPolicy: 'cache-first',
+  });
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
@@ -105,6 +112,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem('token');
     }
   }, [user, token]);
+
+  // When ME query returns, set user if not already present or stale
+  useEffect(() => {
+    if (meData?.me) {
+      setUser(meData.me);
+    }
+  }, [meData]);
 
   const value: AuthContextType = {
     user,

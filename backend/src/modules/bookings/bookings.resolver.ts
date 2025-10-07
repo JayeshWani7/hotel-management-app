@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UseGuards, ValidationPipe } from '@nestjs/common';
 import { Booking } from './entities/booking.entity';
 import { BookingsService } from './bookings.service';
 import { CreateBookingInput, UpdateBookingInput, CancelBookingInput } from './dto/booking.input';
@@ -12,7 +12,7 @@ export class BookingsResolver {
   @Mutation(() => Booking)
   @UseGuards(JwtAuthGuard)
   async createBooking(
-    @Args('createBookingInput') createBookingInput: CreateBookingInput,
+    @Args('createBookingInput', new ValidationPipe({ exceptionFactory: (errors) => new BadRequestException(errors) })) createBookingInput: CreateBookingInput,
     @Context() context: any,
   ): Promise<Booking> {
     return this.bookingsService.create(createBookingInput, context.req.user.userId);
@@ -56,7 +56,14 @@ export class BookingsResolver {
     @Args('id') id: string,
     @Args('updateBookingInput') updateBookingInput: UpdateBookingInput,
   ): Promise<Booking> {
-    return this.bookingsService.update(id, updateBookingInput);
+    try {
+      return await this.bookingsService.update(id, updateBookingInput);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException('Booking not found');
+      }
+      throw error;
+    }
   }
 
   @Mutation(() => Booking)
@@ -71,6 +78,13 @@ export class BookingsResolver {
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async deleteBooking(@Args('id') id: string): Promise<boolean> {
-    return this.bookingsService.remove(id);
+    try {
+      return await this.bookingsService.remove(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException('Booking not found');
+      }
+      throw error;
+    }
   }
 }

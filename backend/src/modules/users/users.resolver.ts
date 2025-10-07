@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
-import { UpdateUserInput } from './dto/user.input';
+import { RegisterUserInput, UpdateUserInput } from './dto/user.input';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Resolver(() => User)
@@ -27,7 +27,7 @@ export class UsersResolver {
     return this.usersService.findOne(context.req.user.userId);
   }
 
-  @Mutation(() => User)
+  // Removed invalid register mutation as UsersService does not have a register method.
   @UseGuards(JwtAuthGuard)
   async updateProfile(
     @Args('updateUserInput') updateUserInput: UpdateUserInput,
@@ -37,8 +37,13 @@ export class UsersResolver {
   }
 
   @Mutation(() => Boolean)
-  @UseGuards(JwtAuthGuard)
-  async deleteUser(@Args('id') id: string): Promise<boolean> {
-    return this.usersService.remove(id);
+@UseGuards(JwtAuthGuard)
+async deleteUser(@Args('id') id: string): Promise<boolean> {
+  const user = await this.usersService.remove(id);
+  if (!user) {
+    throw new Error('User not found');
   }
+  return user;
+}
+
 }
