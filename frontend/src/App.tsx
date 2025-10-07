@@ -22,6 +22,10 @@ import { UserRole } from './types';
 import PaymentCallback from './pages/PaymentCallBack';
 import BookingFailed from './pages/BookingFailed';
 import MyBookings from './pages/customer/MyBookings';
+import LandingPage from "./pages/LandingPage"
+import FoodList from "./pages/food/FoodListing"
+import FoodCart from "./pages/food/FoodCart"
+import OrderHistoryPage from './pages/food/OrderHistory';
 
 const theme = createTheme({
   palette: {
@@ -83,6 +87,18 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={
+          <LandingPage />
+      } />
+      <Route path="/food-list" element={
+          <FoodList />
+      } />
+      <Route path="/food-cart" element={
+          <FoodCart />
+      } />
+      <Route path="/food-orders" element={
+          <OrderHistoryPage />
+      } />
       <Route path="/login" element={
         <PublicRoute>
           <Login />
@@ -204,7 +220,7 @@ const AppRoutes: React.FC = () => {
       } />
       
       {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+    
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

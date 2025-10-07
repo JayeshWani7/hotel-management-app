@@ -8,7 +8,7 @@ import {
   Paper,
   Button,
 } from '@mui/material';
-import { Hotel, BookOnline, Payment } from '@mui/icons-material';
+import { Hotel, BookOnline, Payment, FoodBank } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { GET_USER_BOOKINGS } from '../../graphql/bookingQueries';
 
@@ -45,6 +45,13 @@ const CustomerDashboard: React.FC = () => {
       description: 'Check your transaction history',
       icon: <Payment />,
       path: '/payments',
+      color: 'success' as const,
+    },
+    {
+      title: 'Order food',
+      description: 'Feelin Hungry',
+      icon: <FoodBank />,
+      path: '/food-list',
       color: 'success' as const,
     },
   ];
