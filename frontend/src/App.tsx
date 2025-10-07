@@ -19,6 +19,9 @@ import BookingSuccess from './pages/BookingSuccess';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import { UserRole } from './types';
+import PaymentCallback from './pages/PaymentCallBack';
+import BookingFailed from './pages/BookingFailed';
+import MyBookings from './pages/customer/MyBookings';
 
 const theme = createTheme({
   palette: {
@@ -104,10 +107,11 @@ const AppRoutes: React.FC = () => {
       } />
       <Route path="/bookings" element={
         <ProtectedRoute allowedRoles={[UserRole.USER]}>
-          <div style={{ padding: '2rem' }}>
+          {/* <div style={{ padding: '2rem' }}>
             <h2>My Bookings</h2>
             <p>Booking management page coming soon...</p>
-          </div>
+          </div> */}
+          < MyBookings />
         </ProtectedRoute>
       } />
       <Route path="/payments" element={
@@ -138,9 +142,19 @@ const AppRoutes: React.FC = () => {
           <Payment />
         </ProtectedRoute>
       } />
+      <Route path="/payment/callback" element={
+        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+          <PaymentCallback />
+        </ProtectedRoute>
+      } />
       <Route path="/booking-success" element={
         <ProtectedRoute allowedRoles={[UserRole.USER]}>
           <BookingSuccess />
+        </ProtectedRoute>
+      } />
+      <Route path="/booking-failed" element={
+        <ProtectedRoute allowedRoles={[UserRole.USER]}>
+          <BookingFailed />
         </ProtectedRoute>
       } />
       

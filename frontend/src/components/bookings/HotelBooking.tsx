@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
+
 import { useNavigate, useParams } from 'react-router-dom';
-// import axios from 'axios';
+import axios from 'axios';
 import {
   Container,
   Paper,
@@ -14,20 +16,12 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import {
-  DatePicker,
-  LocalizationProvider,
-} from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import {
-  LocationOn,
-  Star,
-  Person,
-} from '@mui/icons-material';
+import { LocationOn, Star, Person } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
-import { useQuery } from '@apollo/client/react';
-import { GET_HOTEL } from '../../graphql/hotelQueries';
-import { GET_AVAILABLE_ROOMS, GET_ROOMS } from '../../graphql/roomQueries';
+import { client } from '../../utils/appoloClient';
+import { GET_ROOMS_BY_HOTEL } from '../../graphql/roomQueries';
 import type { Hotel } from '../../types';
 
 interface BookingFormData {
@@ -42,6 +36,8 @@ const HotelBooking: React.FC = () => {
   const { hotelId } = useParams<{ hotelId: string }>();
   const navigate = useNavigate();
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
+  const [rooms, setRooms] = useState<any[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState<boolean>(true);
 
   const {
     control,
@@ -62,49 +58,63 @@ const HotelBooking: React.FC = () => {
   const watchCheckOut = watch('checkOutDate');
   const watchGuests = watch('guests');
 
-  const { data: hotelData, loading: hotelLoading, error: hotelError } = useQuery(GET_HOTEL as any, { variables: { id: hotelId }, skip: !hotelId });
-  const hotel: Hotel | undefined = (hotelData as any)?.getHotel;
+  // Fetch rooms from API
+  useEffect(() => {
+    if (!hotelId) return;
 
-  const { data: availableRoomsData } = useQuery(GET_AVAILABLE_ROOMS as any, {
-    variables: hotel && watchCheckIn && watchCheckOut ? {
-      hotelId: hotel.id,
-      checkInDate: watchCheckIn?.toISOString(),
-      checkOutDate: watchCheckOut?.toISOString(),
-    } : undefined,
-    skip: !hotel || !watchCheckIn || !watchCheckOut,
-  });
+    const fetchRooms = async () => {
+      setLoadingRooms(true);
+      try {
+        const { data } = await client.query({
+          query: GET_ROOMS_BY_HOTEL,
+          variables: { hotelId },
+        });
+        setRooms(data.getRooms || []);
+      } catch (err) {
+        console.error('Error fetching rooms:', err);
+      } finally {
+        setLoadingRooms(false);
+      }
+    };
 
-  // Fallback: list all rooms for the hotel when dates are not chosen yet
-  const { data: roomsData } = useQuery(GET_ROOMS as any, {
-    variables: { hotelId: hotel?.id },
-    skip: !hotel || !!(watchCheckIn && watchCheckOut),
-  });
+    fetchRooms();
+  }, [hotelId]);
 
-  const roomTypes = useMemo(() => {
-    const rooms = (availableRoomsData as any)?.getAvailableRooms || (roomsData as any)?.getRooms || (hotel as any)?.rooms || [];
-    return rooms.map((r: any) => ({
-      id: r.id,
-      type: r.type,
-      price: r.pricePerNight,
-      description: r.description || '',
-      amenities: r.amenities || [],
-      capacity: r.capacity || 1,
-    }));
-  }, [availableRoomsData, roomsData, hotel]);
+  const hotel: Hotel = {
+    id: hotelId || '1',
+    name: 'Grand Palace Hotel',
+    description: 'Luxury hotel in the heart of the city with world-class amenities',
+    address: '123 Main Street',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    country: 'India',
+    postalCode: '400001',
+    phone: '+91 9876543210',
+    email: 'info@grandpalace.com',
+    latitude: 19.076,
+    longitude: 72.8777,
+    rating: 4.5,
+    amenities: ['WiFi', 'Pool', 'Spa', 'Gym', 'Restaurant'],
+    images: ['/api/placeholder/600/400'],
+    isActive: true,
+    policies: 'Check-in: 2 PM, Check-out: 11 AM',
+    checkInTime: '14:00',
+    checkOutTime: '11:00',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  };
 
   const calculateNights = () => {
     if (watchCheckIn && watchCheckOut) {
       const diffTime = Math.abs(watchCheckOut.getTime() - watchCheckIn.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
     return 0;
   };
 
   const calculateTotal = () => {
     if (selectedRoom) {
-      const nights = calculateNights();
-      return nights * selectedRoom.price;
+      return calculateNights() * selectedRoom.pricePerNight;
     }
     return 0;
   };
@@ -122,7 +132,7 @@ const HotelBooking: React.FC = () => {
       nights: calculateNights(),
       totalAmount: calculateTotal(),
     };
-    // Proceed to confirmation first to let user review
+
     navigate('/booking-confirmation', { state: bookingData });
   };
 
@@ -176,13 +186,8 @@ const HotelBooking: React.FC = () => {
                 {hotel?.description || ''}
               </Typography>
               <Box display="flex" flexWrap="wrap" gap={1}>
-                {hotel?.amenities?.map((amenity) => (
-                  <Chip
-                    key={amenity}
-                    label={amenity}
-                    size="small"
-                    variant="outlined"
-                  />
+                {hotel.amenities?.map((amenity) => (
+                  <Chip key={amenity} label={amenity} size="small" variant="outlined" />
                 ))}
               </Box>
             </CardContent>
@@ -194,10 +199,9 @@ const HotelBooking: React.FC = () => {
         {/* Booking Form */}
         <Box sx={{ flex: 1 }}>
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h5" component="h2" gutterBottom>
+            <Typography variant="h5" gutterBottom>
               Book Your Stay
             </Typography>
-            
             <Box component="form" onSubmit={handleSubmit(onSubmit)}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={3}>
@@ -220,7 +224,6 @@ const HotelBooking: React.FC = () => {
                       />
                     )}
                   />
-                  
                   <Controller
                     name="checkOutDate"
                     control={control}
@@ -246,9 +249,9 @@ const HotelBooking: React.FC = () => {
                   <Controller
                     name="guests"
                     control={control}
-                    rules={{ 
+                    rules={{
                       required: 'Number of guests is required',
-                      min: { value: 1, message: 'At least 1 guest required' }
+                      min: { value: 1, message: 'At least 1 guest required' },
                     }}
                     render={({ field }) => (
                       <TextField
@@ -262,7 +265,6 @@ const HotelBooking: React.FC = () => {
                       />
                     )}
                   />
-
                   <Controller
                     name="specialRequests"
                     control={control}
@@ -287,19 +289,20 @@ const HotelBooking: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Select Room Type
             </Typography>
-            <Box display="flex" flexDirection="column" gap={2}>
-              {roomTypes
-                .filter((room: any) => room.capacity >= (watchGuests || 1))
-                .map((room: any) => (
+            {loadingRooms ? (
+              <Typography>Loading rooms...</Typography>
+            ) : (
+              <Box display="flex" flexDirection="column" gap={2}>
+                {rooms
+                  .filter((room) => room.capacity >= watchGuests)
+                  .map((room) => (
                     <Card
                       key={room.id}
                       sx={{
                         cursor: 'pointer',
                         border: selectedRoom?.id === room.id ? 2 : 1,
                         borderColor: selectedRoom?.id === room.id ? 'primary.main' : 'divider',
-                        '&:hover': {
-                          boxShadow: 4,
-                        },
+                        '&:hover': { boxShadow: 4 },
                       }}
                       onClick={() => setSelectedRoom(room)}
                     >
@@ -307,7 +310,7 @@ const HotelBooking: React.FC = () => {
                         <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                           <Typography variant="h6">{room.type}</Typography>
                           <Typography variant="h6" color="primary">
-                            ₹{room.price.toLocaleString()}/night
+                            ₹{room.pricePerNight.toLocaleString()}/night
                           </Typography>
                         </Box>
                         <Typography variant="body2" color="text.secondary" paragraph>
@@ -318,19 +321,15 @@ const HotelBooking: React.FC = () => {
                           <Typography variant="body2">Max {room.capacity} guests</Typography>
                         </Box>
                         <Box display="flex" flexWrap="wrap" gap={1}>
-                          {room.amenities.map((amenity: any) => (
-                            <Chip
-                              key={amenity}
-                              label={amenity}
-                              size="small"
-                              variant="outlined"
-                            />
+                          {room.amenities.map((amenity: string) => (
+                            <Chip key={amenity} label={amenity} size="small" variant="outlined" />
                           ))}
                         </Box>
                       </CardContent>
                     </Card>
                   ))}
-            </Box>
+              </Box>
+            )}
           </Paper>
         </Box>
 
@@ -340,20 +339,16 @@ const HotelBooking: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Booking Summary
             </Typography>
-            
+
             {watchCheckIn && watchCheckOut && (
               <>
                 <Box display="flex" justifyContent="space-between" mb={2}>
                   <Typography variant="body2">Check-in:</Typography>
-                  <Typography variant="body2">
-                    {watchCheckIn.toLocaleDateString()}
-                  </Typography>
+                  <Typography variant="body2">{watchCheckIn.toLocaleDateString()}</Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between" mb={2}>
                   <Typography variant="body2">Check-out:</Typography>
-                  <Typography variant="body2">
-                    {watchCheckOut.toLocaleDateString()}
-                  </Typography>
+                  <Typography variant="body2">{watchCheckOut.toLocaleDateString()}</Typography>
                 </Box>
                 <Box display="flex" justifyContent="space-between" mb={2}>
                   <Typography variant="body2">Nights:</Typography>
@@ -361,12 +356,12 @@ const HotelBooking: React.FC = () => {
                 </Box>
               </>
             )}
-            
+
             <Box display="flex" justifyContent="space-between" mb={2}>
               <Typography variant="body2">Guests:</Typography>
               <Typography variant="body2">{watchGuests}</Typography>
             </Box>
-            
+
             {selectedRoom && (
               <>
                 <Divider sx={{ my: 2 }} />
@@ -376,9 +371,7 @@ const HotelBooking: React.FC = () => {
                 </Box>
                 <Box display="flex" justifyContent="space-between" mb={2}>
                   <Typography variant="body2">Rate per night:</Typography>
-                  <Typography variant="body2">
-                    ₹{selectedRoom.price.toLocaleString()}
-                  </Typography>
+                  <Typography variant="body2">₹{selectedRoom.pricePerNight.toLocaleString()}</Typography>
                 </Box>
                 <Divider sx={{ my: 2 }} />
                 <Box display="flex" justifyContent="space-between" mb={3}>
@@ -389,7 +382,7 @@ const HotelBooking: React.FC = () => {
                 </Box>
               </>
             )}
-            
+
             <Button
               variant="contained"
               fullWidth

@@ -74,7 +74,7 @@ export const GET_USER_BOOKINGS = gql`
       payment {
         id
         amount
-        paymentMethod
+        method
         status
       }
     }
@@ -187,3 +187,30 @@ export const DELETE_BOOKING = gql`
     deleteBooking(id: $id)
   }
 `;
+
+
+export const GET_BOOKING_BY_LINK = gql`query GetBookingByLink($linkId: String!) {
+  getBookingByCashFreeOrderID(linkId: $linkId) {
+    id
+    checkInDate
+    checkOutDate
+    numberOfGuests
+    totalAmount
+    room {
+      id
+      type
+      hotel {
+        id
+        name
+        phone
+        email
+        checkInTime
+      }
+    }
+    payment {
+      transactionId
+    }
+  }
+}`;
+
+
