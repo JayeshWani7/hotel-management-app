@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Booking } from './entities/booking.entity';
 import { BookingsService } from './bookings.service';
-import { CreateBookingInput, UpdateBookingInput, CancelBookingInput } from './dto/booking.input';
+import { CreateBookingInput, UpdateBookingInput, CancelBookingInput, UserDashboardStats } from './dto/booking.input';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Resolver(() => Booking)
@@ -73,4 +73,10 @@ export class BookingsResolver {
   async deleteBooking(@Args('id') id: string): Promise<boolean> {
     return this.bookingsService.remove(id);
   }
+  @Query(() => UserDashboardStats)
+  @UseGuards(JwtAuthGuard)
+  async userDashboardStats(@Args('id') id: string): Promise<UserDashboardStats> {
+    return this.bookingsService.getUserDashboardStats(id);
+  }
+
 }

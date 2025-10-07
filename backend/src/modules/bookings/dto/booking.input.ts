@@ -61,7 +61,7 @@
 
 // date type of checkInDate and checkOutDate is changed 
 
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, Field, Int, ObjectType, Float } from '@nestjs/graphql';
 import { IsNotEmpty, IsOptional, IsUUID, IsISO8601, Min, IsInt } from 'class-validator';
 
 @InputType()
@@ -120,4 +120,17 @@ export class CancelBookingInput {
   @Field()
   @IsNotEmpty()
   cancellationReason: string;
+}
+
+
+@ObjectType()
+export class UserDashboardStats {
+  @Field(() => Int)
+  upcomingBookings: number;
+
+  @Field(() => Int)
+  completedBookings: number;
+
+  @Field(() => Float)
+  totalSpent: number;
 }
