@@ -199,4 +199,40 @@ export class BookingsService {
     const conflictingBookings = await query.getCount();
     return conflictingBookings === 0;
   }
+
+  async getUserDashboardStats(userId: string): Promise<{
+    upcomingBookings: number;
+    completedBookings: number;
+    totalSpent: number;
+  }> {
+    const bookings = await this.bookingsRepository.find({
+      where: { user: { id: userId } },
+      relations: ['payment'],
+    });
+  
+    const now = new Date();
+  
+    const upcomingBookings = bookings.filter(
+      (b) =>
+        b.status === 'confirmed' &&
+        new Date(b.checkInDate) > now
+    ).length;
+  
+    const completedBookings = bookings.filter(
+      (b) => b.status === 'completed'
+    ).length;
+  
+    const totalSpent = bookings
+      .filter((b) => b.payment && b.payment.status === 'success')
+      .reduce((sum, b) => sum + Number(b.payment.amount || 0), 0);
+  
+    return {
+      upcomingBookings,
+      completedBookings,
+      totalSpent,
+    };
+  }
+  
+
 }
+

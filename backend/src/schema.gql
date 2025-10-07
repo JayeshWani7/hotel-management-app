@@ -185,6 +185,7 @@ type Query {
   me: User!
   searchHotels(query: String!): [Hotel!]!
   user(id: String!): User!
+  userDashboardStats(id: String!): UserDashboardStats!
   users: [User!]!
 }
 
@@ -286,6 +287,12 @@ type User {
   profileImage: String
   role: UserRole!
   updatedAt: DateTime!
+}
+
+type UserDashboardStats {
+  completedBookings: Int!
+  totalSpent: Float!
+  upcomingBookings: Int!
 }
 
 """The role of the user in the system"""

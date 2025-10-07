@@ -1,15 +1,20 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { User } from './entities/user.entity';
-import { RegisterUserInput, UpdateUserInput } from './dto/user.input';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  createParamDecorator,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import * as bcrypt from "bcrypt";
+import { User } from "./entities/user.entity";
+import { RegisterUserInput, UpdateUserInput } from "./dto/user.input";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private usersRepository: Repository<User>
   ) {}
 
   async create(registerUserInput: RegisterUserInput): Promise<User> {
@@ -18,7 +23,7 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException("User with this email already exists");
     }
 
     const hashedPassword = await bcrypt.hash(registerUserInput.password, 10);
@@ -33,14 +38,14 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find({
-      relations: ['bookings'],
+      relations: ["bookings"],
     });
   }
 
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['bookings'],
+      relations: ["bookings"],
     });
 
     if (!user) {
@@ -66,18 +71,18 @@ export class UsersService {
 
   async remove(id: string): Promise<boolean> {
     const user = await this.findOne(id);
-    
+
     await this.usersRepository.remove(user);
     return true;
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.findByEmail(email);
-    
-    if (user && await bcrypt.compare(password, user.password)) {
+
+    if (user && (await bcrypt.compare(password, user.password))) {
       return user;
     }
-    
+
     return null;
   }
 }
