@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_ROOMS, ADD_ROOM, UPDATE_ROOM, DELETE_ROOM } from '../../graphql/roomQueries';
+import { GET_ROOMS_BY_HOTEL, ADD_ROOM, UPDATE_ROOM, DELETE_ROOM } from '../../graphql/roomQueries';
 import { GET_HOTELS } from '../../graphql/hotelQueries';
 import {
   Box,
@@ -43,7 +43,7 @@ const RoomManagement: React.FC = () => {
   const hotels = hotelsData?.getHotels || [];
 
   const [selectedHotelId, setSelectedHotelId] = useState<string>('');
-  const { data, loading, error, refetch } = useQuery(GET_ROOMS, {
+  const { data, loading, error, refetch } = useQuery(GET_ROOMS_BY_HOTEL, {
     variables: { hotelId: selectedHotelId || undefined },
   });
   const rooms = data?.getRooms || [];
